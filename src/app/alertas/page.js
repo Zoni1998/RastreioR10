@@ -1,4 +1,4 @@
-import { supabase } from '../../utils/supabase';
+import { createClient } from '../../utils/supabase/server';
 import { Bell, Check, PackageX, AlertTriangle, Inbox } from 'lucide-react';
 import { resolveAlertAction } from './actions';
 import Link from 'next/link';
@@ -6,6 +6,12 @@ import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 
 export default async function AlertasPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: store } = await supabase.from('stores').select('id, nuvemshop_store_id').eq('user_id', user.id).single();
+
+  if (!store) return <div style={{padding: '32px'}}>Nenhuma loja conectada.</div>;
+
   // Buscar notificações ativas (não lidas)
   const { data: notifications } = await supabase
     .from('notifications')
@@ -17,6 +23,7 @@ export default async function AlertasPage() {
         nuvemshop_order_id
       )
     `)
+    .eq('store_id', store.id)
     .eq('is_read', false)
     .order('created_at', { ascending: false });
 
@@ -80,7 +87,7 @@ export default async function AlertasPage() {
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
                       <a 
-                        href={`https://vzsports2.lojavirtualnuvem.com.br/admin/orders/${notif.order?.nuvemshop_order_id}`} 
+                        href={`https://${store.nuvemshop_store_id}.lojavirtualnuvem.com.br/admin/orders/${notif.order?.nuvemshop_order_id}`} 
                         target="_blank" 
                         rel="noreferrer"
                         className="btn btn-outline"

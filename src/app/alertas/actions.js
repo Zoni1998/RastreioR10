@@ -1,6 +1,6 @@
 'use server';
 
-import { supabase } from '../../utils/supabase';
+import { createClient } from '../../utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 export async function resolveAlertAction(formData) {
@@ -10,6 +10,11 @@ export async function resolveAlertAction(formData) {
     return { success: false, error: 'ID da notificação inválido' };
   }
 
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Não autorizado' };
+
+  // Atualizar apenas se a notificação pertencer a uma loja do usuário
   const { error } = await supabase
     .from('notifications')
     .update({ is_read: true })

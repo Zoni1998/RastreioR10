@@ -1,16 +1,21 @@
 'use server';
 
-import { supabase } from '../utils/supabase';
+import { createClient } from '../utils/supabase/server';
 import { checkOrderDelays } from '../services/trackingService';
 import { revalidatePath } from 'next/cache';
 
 export async function syncOrdersAction() {
   try {
-    // Pegar a primeira loja (como o app é para uma loja só)
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) throw new Error('Não autenticado');
+
+    // Pegar a loja do usuário
     const { data: store, error: storeError } = await supabase
       .from('stores')
       .select('*')
-      .limit(1)
+      .eq('user_id', user.id)
       .single();
 
     if (storeError || !store) throw new Error('Loja não encontrada no banco.');

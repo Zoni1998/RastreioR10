@@ -1,28 +1,31 @@
-import { supabase } from '../../utils/supabase';
+import { createClient } from '../../utils/supabase/server';
 import { Settings, Save, Store, Info } from 'lucide-react';
+import Link from 'next/link';
 import { updateStoreConfig } from './actions';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ConfiguracoesPage() {
-  // Pegar a loja (assumindo single tenant por enquanto)
-  const { data: store } = await supabase
-    .from('stores')
-    .select('*')
-    .limit(1)
-    .single();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+    // Pegar a loja do usuário e contagem de pedidos
+  const { data: store } = await supabase.from('stores').select('id, nuvemshop_store_id, posting_delay_days, delivery_delay_days, store_domain, created_at, whatsapp_message, email_alerts, current_plan').eq('user_id', user.id).single();
 
   if (!store) {
     return (
       <div className="page-header">
         <h1 className="page-title">Configurações</h1>
-        <p style={{color: 'var(--text-secondary)'}}>Nenhuma loja vinculada. Vá ao Dashboard e Sincronize.</p>
+        <p style={{color: 'var(--text-secondary)'}}>Nenhuma loja vinculada. Vá ao Dashboard e conecte-se à Nuvemshop.</p>
       </div>
     );
   }
 
   const postingDays = store.posting_delay_days || 7;
   const deliveryDays = store.delivery_delay_days || 25;
+  const defaultMessage = "Olá {cliente}, aqui é da loja. Notamos um pequeno atraso logístico no seu pedido #{pedido} e já estamos acionando a transportadora para resolver!";
+  const whatsappMessage = store.whatsapp_message || defaultMessage;
+  const planName = store.current_plan === 'pro' ? 'Plano Pro' : 'Plano Start';
 
   return (
     <div>
@@ -35,6 +38,28 @@ export default async function ConfiguracoesPage() {
 
       <div className="grid-cards" style={{ gridTemplateColumns: '1fr', maxWidth: '800px' }}>
         
+        {/* Card de Assinatura */}
+        <div className="card" style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, var(--surface) 100%)', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+          <h2 style={{ fontSize: '1.25rem', marginTop: 0, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Store size={20} color="var(--primary)" /> Meu Plano
+          </h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <p style={{ margin: '0 0 4px 0', color: 'var(--text-secondary)' }}>Plano Atual</p>
+              <h3 style={{ margin: 0, fontSize: '1.5rem', color: 'var(--text-primary)', textTransform: 'capitalize' }}>{planName}</h3>
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <span className="badge success">Ativo</span>
+              {store.current_plan !== 'max' && (
+                <Link href="/assinatura" className="btn" style={{ textDecoration: 'none', padding: '8px 16px', fontSize: '0.9rem' }}>
+                  Fazer Upgrade
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Card de Integração */}
         <div className="card">
           <h2 style={{ fontSize: '1.25rem', marginTop: 0, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -52,53 +77,114 @@ export default async function ConfiguracoesPage() {
         {/* Card de Regras de Negócio */}
         <div className="card">
           <h2 style={{ fontSize: '1.25rem', marginTop: 0, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Info size={20} color="var(--text-secondary)" /> Regras de Atraso
+            <Info size={20} color="var(--text-secondary)" /> Preferências e Atrasos
           </h2>
           
           <form action={updateStoreConfig} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <input type="hidden" name="storeId" value={store.id} />
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label htmlFor="postingDays" style={{ fontWeight: '500' }}>Tolerância para Postagem (dias)</label>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-                Quantos dias o lojista tem para embalar e enviar o produto (marcar como enviado) antes de gerar um Alerta Amarelo.
+              <label htmlFor="store_domain" style={{ fontWeight: '500', fontSize: '1rem' }}>Domínio da Nuvemshop (Nome da sua loja)</label>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 8px 0' }}>
+                Apenas o nome que vem antes de .lojavirtualnuvem.com.br (Exemplo: <b>vzsports2</b>)
               </p>
               <input 
-                type="number" 
-                id="postingDays" 
-                name="postingDays" 
-                defaultValue={postingDays} 
-                min="1" max="60"
-                style={{
-                  padding: '12px', borderRadius: '8px', border: '1px solid var(--border)',
-                  backgroundColor: 'var(--background)', color: 'var(--text-primary)',
-                  fontSize: '1rem', width: '150px'
-                }}
+                id="store_domain" 
+                name="store_domain" 
+                type="text" 
+                defaultValue={store.store_domain || ''}
+                placeholder="vzsports2"
+                style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--background)', color: 'var(--text-primary)', fontSize: '1rem' }}
               />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label htmlFor="deliveryDays" style={{ fontWeight: '500' }}>Tolerância para Entrega (dias)</label>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-                Quantos dias a transportadora tem para entregar o pacote após a compra, antes de gerar um Alerta Vermelho.
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label htmlFor="whatsapp_message" style={{ fontWeight: '500', fontSize: '1rem' }}>Mensagem Padrão do WhatsApp</label>
+                {store.current_plan === 'start' && (
+                  <span className="badge warning" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    🔒 Exclusivo PRO
+                  </span>
+                )}
+              </div>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 8px 0' }}>
+                Use <b>{`{cliente}`}</b> para o nome do comprador e <b>{`{pedido}`}</b> para o número do pedido.
               </p>
-              <input 
-                type="number" 
-                id="deliveryDays" 
-                name="deliveryDays" 
-                defaultValue={deliveryDays} 
-                min="1" max="90"
-                style={{
-                  padding: '12px', borderRadius: '8px', border: '1px solid var(--border)',
-                  backgroundColor: 'var(--background)', color: 'var(--text-primary)',
-                  fontSize: '1rem', width: '150px'
-                }}
-              />
+              
+              {store.current_plan === 'start' ? (
+                <div style={{ padding: '16px', backgroundColor: 'var(--background)', borderRadius: '8px', border: '1px dashed var(--border)', textAlign: 'center' }}>
+                  <p style={{ margin: '0 0 16px 0', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                    Personalização de mensagens de WhatsApp está disponível apenas nos planos Pro e Max.
+                  </p>
+                  <Link href="/assinatura" className="btn" style={{ textDecoration: 'none', display: 'inline-block' }}>
+                    Desbloquear Personalização
+                  </Link>
+                </div>
+              ) : (
+                <textarea 
+                  id="whatsapp_message" 
+                  name="whatsapp_message" 
+                  defaultValue={whatsappMessage}
+                  rows={3}
+                  style={{
+                    padding: '12px', borderRadius: '8px', border: '1px solid var(--border)',
+                    backgroundColor: 'var(--background)', color: 'var(--text-primary)',
+                    fontSize: '1rem', fontFamily: 'inherit', resize: 'vertical'
+                  }}
+                />
+              )}
             </div>
 
-            <button type="submit" className="btn" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', alignSelf: 'flex-start' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <input 
+                type="checkbox" 
+                id="email_alerts" 
+                name="email_alerts" 
+                defaultChecked={store.email_alerts}
+                style={{ width: '20px', height: '20px', accentColor: 'var(--primary)' }}
+              />
+              <label htmlFor="email_alerts" style={{ fontWeight: '500', fontSize: '1rem', cursor: 'pointer' }}>
+                Receber Alertas por E-mail (Em breve)
+              </label>
+            </div>
+
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+                <label htmlFor="postingDays" style={{ fontWeight: '500', fontSize: '1rem' }}>Dias de Atraso para Postagem</label>
+                <input 
+                  type="number" 
+                  id="postingDays" 
+                  name="postingDays" 
+                  defaultValue={postingDays} 
+                  min="1" max="60"
+                  style={{
+                    padding: '12px', borderRadius: '8px', border: '1px solid var(--border)',
+                    backgroundColor: 'var(--background)', color: 'var(--text-primary)',
+                    fontSize: '1rem'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+                <label htmlFor="deliveryDays" style={{ fontWeight: '500', fontSize: '1rem' }}>Dias de Atraso para Entrega</label>
+                <input 
+                  type="number" 
+                  id="deliveryDays" 
+                  name="deliveryDays" 
+                  defaultValue={deliveryDays} 
+                  min="1" max="90"
+                  style={{
+                    padding: '12px', borderRadius: '8px', border: '1px solid var(--border)',
+                    backgroundColor: 'var(--background)', color: 'var(--text-primary)',
+                    fontSize: '1rem'
+                  }}
+                />
+              </div>
+            </div>
+
+            <button type="submit" className="btn" style={{ alignSelf: 'flex-start', padding: '12px 24px', fontSize: '1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Save size={18} />
-              Salvar Regras
+              Salvar Configurações
             </button>
           </form>
         </div>

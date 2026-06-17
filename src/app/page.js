@@ -1,15 +1,45 @@
-import { PackageX, Clock, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { createClient } from '../utils/supabase/server';
 import DashboardChart from '../components/DashboardChart';
-import { supabase } from '../utils/supabase';
+import { Package, Truck, AlertTriangle, RefreshCw, PlusCircle, PackageX, Clock, CheckCircle2 } from 'lucide-react';
 import { syncOrdersAction } from './actions';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Home() {
+export default async function Dashboard() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Pegar a loja do usuário atual
+  const { data: store } = await supabase
+    .from('stores')
+    .select('*')
+    .eq('user_id', user.id)
+    .single();
+
+  if (!store) {
+    const clientId = process.env.NUVEMSHOP_CLIENT_ID || '';
+    return (
+      <div className="page-header">
+        <h1 className="page-title">Bem-vindo ao TrackFlow!</h1>
+        <p style={{color: 'var(--text-secondary)', marginBottom: '24px'}}>Você ainda não conectou nenhuma loja. Para começarmos a monitorar seus atrasos, conecte sua conta da Nuvemshop.</p>
+        
+        <a 
+          href={`https://www.nuvemshop.com.br/apps/${clientId}/authorize`}
+          className="btn" 
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}
+        >
+          <PlusCircle size={20} />
+          Conectar Minha Loja Nuvemshop
+        </a>
+      </div>
+    );
+  }
+
   // Buscar pedidos reais no Supabase
   const { data: orders } = await supabase
     .from('orders')
     .select('*')
+    .eq('store_id', store.id)
     .order('purchase_date', { ascending: false });
 
   const safeOrders = orders || [];
@@ -18,9 +48,18 @@ export default async function Home() {
   const pendingPayment = safeOrders.filter(o => o.payment_status === 'pending').length;
   const readyToShip = safeOrders.filter(o => o.payment_status === 'paid' && o.shipping_status === 'unfulfilled').length;
   const inTransit = safeOrders.filter(o => o.shipping_status === 'shipped').length;
-  const delayedPosting = safeOrders.filter(o => o.shipping_status === 'delayed_posting').length;
-  const delayedDelivery = safeOrders.filter(o => o.shipping_status === 'delayed_delivery').length;
+  
+  const delayedPosting = safeOrders.filter(o => o.shipping_status === 'delayed_posting');
+  const delayedDelivery = safeOrders.filter(o => o.shipping_status === 'delayed_delivery');
   const delivered = safeOrders.filter(o => o.shipping_status === 'delivered').length;
+
+  const totalDelayed = delayedPosting.length + delayedDelivery.length;
+  const valueAtRisk = [...delayedPosting, ...delayedDelivery].reduce((sum, o) => sum + parseFloat(o.total_amount || 0), 0);
+  
+  const totalOrdersCount = safeOrders.length;
+  const healthScore = totalOrdersCount > 0 
+    ? Math.round(((totalOrdersCount - totalDelayed) / totalOrdersCount) * 100) 
+    : 100;
 
   // Gerar dados para o gráfico baseado nos últimos 6 dias reais
   const chartData = [];
@@ -43,11 +82,48 @@ export default async function Home() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Visão Geral</h1>
+        <div>
+          <h1 className="page-title">Visão Geral</h1>
+          <p style={{ color: 'var(--text-secondary)', margin: '8px 0 0 0', fontSize: '1.1rem' }}>
+            Protegendo a lucratividade do seu e-commerce em tempo real.
+          </p>
+        </div>
         {/* Formulário com Server Action para sincronizar */}
         <form action={syncOrdersAction}>
-          <button type="submit" className="btn">Sincronizar Nuvemshop Agora</button>
+          <button type="submit" className="btn" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <RefreshCw size={18} />
+            Sincronizar Manual
+          </button>
         </form>
+      </div>
+
+      {/* Cards Premium Principais (Financeiro e Health) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '24px' }}>
+        <div className="card" style={{ background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, var(--surface) 100%)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+          <div className="card-header" style={{ color: 'var(--danger)', display: 'flex', justifyContent: 'space-between' }}>
+            <span>Receita em Risco (Atrasos)</span>
+            <AlertTriangle size={20} />
+          </div>
+          <div className="card-value" style={{ color: 'var(--text-primary)', fontSize: '2.5rem' }}>
+            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valueAtRisk)}
+          </div>
+          <p style={{ margin: '8px 0 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+            Baseado em {totalDelayed} pedidos com problema logístico.
+          </p>
+        </div>
+
+        <div className="card" style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, var(--surface) 100%)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+          <div className="card-header" style={{ color: 'var(--success)', display: 'flex', justifyContent: 'space-between' }}>
+            <span>Logistics Health Score</span>
+            <CheckCircle2 size={20} />
+          </div>
+          <div className="card-value" style={{ color: 'var(--text-primary)', fontSize: '2.5rem', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+            {healthScore} <span style={{ fontSize: '1rem', color: 'var(--text-secondary)', fontWeight: 'normal' }}>/ 100</span>
+          </div>
+          <p style={{ margin: '8px 0 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+            {healthScore >= 90 ? 'Sua operação está excelente!' : healthScore >= 70 ? 'Atenção necessária em alguns envios.' : 'Risco crítico de avaliações negativas.'}
+          </p>
+        </div>
       </div>
 
       {/* Cards de Métricas */}
@@ -70,19 +146,11 @@ export default async function Home() {
 
         <div className="card">
           <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span>Em Trânsito</span>
-            <Clock size={18} color="var(--info)" />
-          </div>
-          <div className="card-value">{inTransit}</div>
-        </div>
-
-        <div className="card">
-          <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span>Atraso na Postagem</span>
             <PackageX size={18} color="var(--warning)" />
           </div>
-          <div className="card-value" style={{ color: delayedPosting > 0 ? 'var(--warning)' : 'var(--text-primary)' }}>
-            {delayedPosting}
+          <div className="card-value" style={{ color: delayedPosting.length > 0 ? 'var(--warning)' : 'var(--text-primary)' }}>
+            {delayedPosting.length}
           </div>
         </div>
 
@@ -91,17 +159,9 @@ export default async function Home() {
             <span>Atraso na Entrega</span>
             <AlertTriangle size={18} color="var(--danger)" />
           </div>
-          <div className="card-value" style={{ color: delayedDelivery > 0 ? 'var(--danger)' : 'var(--text-primary)' }}>
-            {delayedDelivery}
+          <div className="card-value" style={{ color: delayedDelivery.length > 0 ? 'var(--danger)' : 'var(--text-primary)' }}>
+            {delayedDelivery.length}
           </div>
-        </div>
-
-        <div className="card">
-          <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span>Entregues</span>
-            <CheckCircle2 size={18} color="var(--success)" />
-          </div>
-          <div className="card-value">{delivered}</div>
         </div>
       </div>
 

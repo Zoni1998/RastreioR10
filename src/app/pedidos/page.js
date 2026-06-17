@@ -1,5 +1,5 @@
-import { supabase } from '../../utils/supabase';
-import { Package, ExternalLink, Filter } from 'lucide-react';
+import { createClient } from '../../utils/supabase/server';
+import { Package, ExternalLink, Filter, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -8,8 +8,14 @@ export default async function PedidosPage({ searchParams }) {
   const params = await searchParams;
   const filter = params?.filter || 'todos';
   
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: store } = await supabase.from('stores').select('id, nuvemshop_store_id, store_domain, whatsapp_message').eq('user_id', user.id).single();
+
+  if (!store) return <div style={{padding: '32px'}}>Nenhuma loja conectada.</div>;
+
   // Buscar pedidos
-  let query = supabase.from('orders').select('*').order('purchase_date', { ascending: false });
+  let query = supabase.from('orders').select('*').eq('store_id', store.id).order('purchase_date', { ascending: false });
   
   if (filter === 'pendentes') {
     query = query.eq('payment_status', 'pending');
@@ -85,7 +91,7 @@ export default async function PedidosPage({ searchParams }) {
                   else if (order.payment_status === 'abandoned') { payBadge = 'danger'; payText = 'Abandonado'; }
 
                   return (
-                    <tr key={order.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                    <tr key={order.id} style={{ borderBottom: '1px solid var(--border)', transition: 'background-color 0.2s' }}>
                       <td style={{ padding: '16px 0', fontWeight: 'bold' }}>#{order.order_number}</td>
                       <td style={{ padding: '16px 0' }}>{order.customer_name}</td>
                       <td style={{ padding: '16px 0' }}>{purchaseDate.toLocaleDateString('pt-BR')}</td>
@@ -95,14 +101,41 @@ export default async function PedidosPage({ searchParams }) {
                       <td style={{ padding: '16px 0' }}><span className={`badge ${payBadge}`}>{payText}</span></td>
                       <td style={{ padding: '16px 0' }}><span className={`badge ${shippingBadge}`}>{shippingText}</span></td>
                       <td style={{ padding: '16px 0' }}>
-                        <a 
-                          href={`https://vzsports2.lojavirtualnuvem.com.br/admin/orders/${order.nuvemshop_order_id}`} 
-                          target="_blank" 
-                          rel="noreferrer"
-                          style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', fontWeight: '500' }}
-                        >
-                          Ver <ExternalLink size={14} />
-                        </a>
+                        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                          {(order.shipping_status === 'delayed_posting' || order.shipping_status === 'delayed_delivery') && (() => {
+                            const template = store.whatsapp_message || "Olá {cliente}, aqui é da loja. Notamos um pequeno atraso logístico no seu pedido #{pedido} e já estamos acionando a transportadora para resolver!";
+                            const rawMsg = template
+                              .replace(/{cliente}/g, order.customer_name)
+                              .replace(/{pedido}/g, order.order_number);
+                            
+                            return (
+                              <a 
+                                href={`https://wa.me/?text=${encodeURIComponent(rawMsg)}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', fontWeight: '500', padding: '6px 12px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px' }}
+                                title="Avisar cliente no WhatsApp"
+                              >
+                                <MessageCircle size={16} /> Avisar
+                              </a>
+                            );
+                          })()}
+                          
+                          {store.store_domain ? (
+                            <a 
+                              href={`https://${store.store_domain}.lojavirtualnuvem.com.br/admin/orders/${order.nuvemshop_order_id}`} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', fontWeight: '500' }}
+                            >
+                              Ver <ExternalLink size={14} />
+                            </a>
+                          ) : (
+                            <span style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9rem' }} title="Configure o domínio da loja na aba Configurações">
+                              Link indisponível
+                            </span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   )
