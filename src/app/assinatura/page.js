@@ -1,4 +1,4 @@
-import { Check, Star, Zap } from 'lucide-react';
+import { Check, Star, Zap, CheckCircle } from 'lucide-react';
 import { createClient } from '../../utils/supabase/server';
 import Link from 'next/link';
 
@@ -41,13 +41,13 @@ export default async function AssinaturaPage() {
     {
       id: 'pro',
       name: 'Pro',
-      price: '147',
+      price: '79,90',
       description: 'O parceiro ideal para lojas que já operam com previsibilidade.',
-      icon: <Star size={24} color="#8b5cf6" />,
+      icon: <CheckCircle size={24} color="#8b5cf6" />,
       color: '#8b5cf6',
       highlight: true,
       features: [
-        'Até 1.500 pedidos monitorados/mês',
+        'Limite de 1.000 pedidos monitorados/mês',
         'Mensagens de WhatsApp Personalizáveis',
         'Alertas Semanais Automáticos (E-mail)',
         'Alerta de Risco de Extravio (5 dias parado)',
@@ -56,7 +56,7 @@ export default async function AssinaturaPage() {
       ],
       notIncluded: [
         'Disparo Automático de WhatsApp',
-        'Auditoria de Reembolso (Correios)',
+        'Página de Rastreio White-Label',
         'Múltiplas Lojas conectadas',
         'Acessos para Equipe'
       ]
@@ -64,17 +64,18 @@ export default async function AssinaturaPage() {
     {
       id: 'max',
       name: 'Max',
-      price: '297',
+      price: '119,90',
       description: 'Para agências, dropshippers maduros e grandes volumes.',
       icon: <Zap size={24} color="#10b981" />,
       color: '#10b981',
       features: [
         'Pedidos Ilimitados',
         'Disparo 100% Automático no WhatsApp',
-        'Auditoria de Reembolso de Fretes (PIX)',
+        'Página de Rastreio White-Label (Seu Domínio)',
         'Múltiplas Lojas Nuvemshop',
         'Acesso Restrito para Equipe de SAC',
-        'Gerente de Contas Dedicado'
+        'Gerente de Contas Dedicado',
+        'TrackIA (Em breve) ✨'
       ],
       notIncluded: []
     }
@@ -85,7 +86,7 @@ export default async function AssinaturaPage() {
       <div className="page-header" style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto', paddingBottom: '32px' }}>
         <h1 className="page-title" style={{ justifyContent: 'center', fontSize: '2.5rem', marginBottom: '16px' }}>Faça o Upgrade da sua Operação</h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: '1.6' }}>
-          Escolha o plano ideal para blindar sua logística, reter mais clientes e recuperar dinheiro dos correios. Comece pequeno, escale rápido.
+          Escolha o plano ideal para blindar sua logística, reter mais clientes e profissionalizar sua marca. Comece pequeno, escale rápido.
         </p>
       </div>
 

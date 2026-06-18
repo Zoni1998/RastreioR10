@@ -32,10 +32,15 @@ export async function signup(prevState, formData) {
 
   // No ambiente de dev, pode ser que e-mails de confirmação estejam desligados ou exijam configuração.
   // Vamos presumir que o usuário entra direto.
-  const { error } = await supabase.auth.signUp(data)
+  const { data: authData, error } = await supabase.auth.signUp(data)
 
   if (error) {
     return { success: false, error: error.message }
+  }
+
+  // Se o Supabase não retornar uma sessão, significa que a confirmação de e-mail está ligada
+  if (!authData.session) {
+    return { success: true, requireEmailVerification: true, message: 'Verifique seu e-mail para ativar a conta.' }
   }
 
   revalidatePath('/', 'layout')

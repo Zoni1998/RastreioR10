@@ -50,74 +50,102 @@ export default function RegisterPage() {
               </div>
             )}
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label htmlFor="email" style={{ fontSize: '0.9rem', fontWeight: '500', color: 'var(--text-primary)' }}>E-mail profissional</label>
-              <input 
-                id="email" 
-                name="email" 
-                type="email" 
-                required 
-                placeholder="voce@sualoja.com.br"
-                style={{ 
-                  padding: '14px 16px', 
-                  borderRadius: '12px', 
-                  border: '1px solid var(--border)', 
-                  backgroundColor: 'var(--surface)', 
-                  color: 'var(--text-primary)',
-                  outline: 'none',
-                  fontSize: '1rem',
-                  transition: 'border-color 0.2s'
-                }}
-              />
-            </div>
+            {state?.requireEmailVerification ? (
+              <div style={{
+                padding: '32px',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid rgba(16, 185, 129, 0.2)',
+                borderRadius: '16px',
+                textAlign: 'center',
+                animation: 'fadeIn 0.5s ease-out'
+              }}>
+                <div style={{
+                  width: '64px', height: '64px', borderRadius: '50%',
+                  backgroundColor: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  margin: '0 auto 16px auto', boxShadow: '0 8px 16px rgba(16, 185, 129, 0.2)'
+                }}>
+                  <Package size={32} color="#fff" />
+                </div>
+                <h3 style={{ margin: '0 0 12px 0', fontSize: '1.25rem', color: '#10b981' }}>Quase lá!</h3>
+                <p style={{ margin: '0 0 24px 0', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                  {state.message} Confira também a sua pasta de Spam.
+                </p>
+                <Link href="/login" className="btn" style={{ textDecoration: 'none', width: '100%', display: 'inline-block' }}>
+                  Ir para o Login
+                </Link>
+              </div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label htmlFor="email" style={{ fontSize: '0.9rem', fontWeight: '500', color: 'var(--text-primary)' }}>E-mail profissional</label>
+                  <input 
+                    id="email" 
+                    name="email" 
+                    type="email" 
+                    required 
+                    placeholder="voce@sualoja.com.br"
+                    style={{ 
+                      padding: '14px 16px', 
+                      borderRadius: '12px', 
+                      border: '1px solid var(--border)', 
+                      backgroundColor: 'var(--surface)', 
+                      color: 'var(--text-primary)',
+                      outline: 'none',
+                      fontSize: '1rem',
+                      transition: 'border-color 0.2s'
+                    }}
+                  />
+                </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label htmlFor="password" style={{ fontSize: '0.9rem', fontWeight: '500', color: 'var(--text-primary)' }}>Crie uma senha forte</label>
-              <input 
-                id="password" 
-                name="password" 
-                type="password" 
-                required 
-                placeholder="••••••••"
-                style={{ 
-                  padding: '14px 16px', 
-                  borderRadius: '12px', 
-                  border: '1px solid var(--border)', 
-                  backgroundColor: 'var(--surface)', 
-                  color: 'var(--text-primary)',
-                  outline: 'none',
-                  fontSize: '1rem',
-                  transition: 'border-color 0.2s'
-                }}
-              />
-            </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label htmlFor="password" style={{ fontSize: '0.9rem', fontWeight: '500', color: 'var(--text-primary)' }}>Crie uma senha forte</label>
+                  <input 
+                    id="password" 
+                    name="password" 
+                    type="password" 
+                    required 
+                    placeholder="••••••••"
+                    style={{ 
+                      padding: '14px 16px', 
+                      borderRadius: '12px', 
+                      border: '1px solid var(--border)', 
+                      backgroundColor: 'var(--surface)', 
+                      color: 'var(--text-primary)',
+                      outline: 'none',
+                      fontSize: '1rem',
+                      transition: 'border-color 0.2s'
+                    }}
+                  />
+                </div>
 
-            <button 
-              type="submit" 
-              disabled={isPending}
-              style={{
-                marginTop: '8px',
-                padding: '14px',
-                backgroundColor: 'var(--primary)',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '1rem',
-                fontWeight: '600',
-                cursor: isPending ? 'not-allowed' : 'pointer',
-                opacity: isPending ? 0.7 : 1,
-                boxShadow: 'var(--shadow-primary)',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: '8px',
-                transition: 'all 0.2s'
-              }}
-            >
-              {isPending ? 'Criando conta...' : (
-                <>Criar Conta Grátis <ArrowRight size={18} /></>
-              )}
-            </button>
+                <button 
+                  type="submit" 
+                  disabled={isPending}
+                  style={{
+                    marginTop: '8px',
+                    padding: '14px',
+                    backgroundColor: 'var(--primary)',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '12px',
+                    fontSize: '1rem',
+                    fontWeight: '600',
+                    cursor: isPending ? 'not-allowed' : 'pointer',
+                    opacity: isPending ? 0.7 : 1,
+                    boxShadow: 'var(--shadow-primary)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    gap: '8px',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {isPending ? 'Criando conta...' : (
+                    <>Criar Conta Grátis <ArrowRight size={18} /></>
+                  )}
+                </button>
+              </>
+            )}
           </form>
 
           <p style={{ marginTop: '32px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>

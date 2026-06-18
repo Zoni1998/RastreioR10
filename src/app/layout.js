@@ -69,6 +69,13 @@ export default async function RootLayout({ children }) {
                 Configurações
               </Link>
               
+              {user?.email === process.env.ADMIN_EMAIL && (
+                <Link href="/admin" className="nav-link" style={{ backgroundColor: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', fontWeight: 'bold' }}>
+                  <Settings size={20} />
+                  Painel Admin
+                </Link>
+              )}
+              
               <form action={logout}>
                 <button type="submit" className="nav-link" style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', color: 'var(--danger)', marginTop: '8px' }}>
                   <LogOut size={20} />

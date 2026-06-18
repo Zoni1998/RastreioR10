@@ -10,9 +10,16 @@ export default async function PedidosPage({ searchParams }) {
   
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const { data: store } = await supabase.from('stores').select('id, nuvemshop_store_id, store_domain, whatsapp_message').eq('user_id', user.id).single();
+  const { data: store } = await supabase.from('stores').select('id, nuvemshop_store_id, store_domain, whatsapp_message, current_plan, orders_this_month').eq('user_id', user.id).single();
 
   if (!store) return <div style={{padding: '32px'}}>Nenhuma loja conectada.</div>;
+
+  const currentPlan = store.current_plan || 'start';
+  const planLimits = { start: 100, pro: 1000, max: 'Ilimitado' };
+  const currentLimit = planLimits[currentPlan];
+  const ordersUsed = store.orders_this_month || 0;
+  const percent = currentLimit === 'Ilimitado' ? (ordersUsed > 0 ? 100 : 0) : Math.min((ordersUsed / currentLimit) * 100, 100);
+  const isNearLimit = currentLimit !== 'Ilimitado' && percent >= 80;
 
   // Buscar pedidos
   let query = supabase.from('orders').select('*').eq('store_id', store.id).order('purchase_date', { ascending: false });
@@ -40,6 +47,41 @@ export default async function PedidosPage({ searchParams }) {
           <Package size={28} color="var(--primary)" style={{ marginRight: '12px', verticalAlign: 'middle' }} />
           Gestão de Pedidos
         </h1>
+      </div>
+
+      {/* Banner de Consumo e Upgrade */}
+      <div className="card" style={{ padding: '20px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '24px', borderLeft: isNearLimit ? '4px solid var(--warning)' : '4px solid var(--primary)' }}>
+        <div style={{ flex: '1', minWidth: '300px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>
+              Cota Mensal de Pedidos ({currentPlan.toUpperCase()})
+            </span>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+              {ordersUsed} / {currentLimit}
+            </span>
+          </div>
+          {currentLimit !== 'Ilimitado' ? (
+            <div style={{ width: '100%', height: '8px', backgroundColor: 'var(--background)', borderRadius: '4px', overflow: 'hidden' }}>
+              <div style={{ 
+                height: '100%', 
+                width: `${percent}%`, 
+                backgroundColor: isNearLimit ? 'var(--warning)' : 'var(--primary)',
+                transition: 'width 0.5s ease-out'
+              }} />
+            </div>
+          ) : (
+             <div style={{ width: '100%', height: '8px', background: 'linear-gradient(90deg, #10b981, #3b82f6)', borderRadius: '4px' }} />
+          )}
+          {isNearLimit && currentLimit !== 'Ilimitado' && (
+             <p style={{ margin: '8px 0 0 0', color: 'var(--warning)', fontSize: '0.85rem' }}>Você está próximo de atingir o limite do plano.</p>
+          )}
+        </div>
+        
+        {currentPlan !== 'max' && (
+          <Link href="/assinatura" className="btn" style={{ textDecoration: 'none', background: 'linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%)', boxShadow: 'var(--shadow-primary)', border: 'none' }}>
+            ⭐ Fazer Upgrade de Plano
+          </Link>
+        )}
       </div>
 
       <div className="card" style={{ padding: '16px', marginBottom: '24px', display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>

@@ -37,6 +37,17 @@ export async function POST(request) {
       return NextResponse.json({ message: 'Loja não encontrada' }, { status: 200 });
     }
 
+    // 2.5 Verificar Limites (Feature Gating)
+    const currentPlan = store.current_plan || 'start';
+    const planLimits = { start: 100, pro: 1000, max: 'Ilimitado' };
+    const limit = planLimits[currentPlan];
+    const ordersUsed = store.orders_this_month || 0;
+
+    if (limit !== 'Ilimitado' && ordersUsed >= limit) {
+      console.log(`[Cota Excedida] Loja ${nuvemshopStoreId} ignorada no Webhook. Limite do plano ${currentPlan} atingido.`);
+      return NextResponse.json({ message: 'Cota do plano excedida. Faça upgrade para receber atualizações.' }, { status: 200 });
+    }
+
     // 3. Buscar os dados completos do pedido na API da Nuvemshop
     const response = await fetch(`https://api.tiendanube.com/v1/${nuvemshopStoreId}/orders/${nuvemshopOrderId}`, {
       headers: {

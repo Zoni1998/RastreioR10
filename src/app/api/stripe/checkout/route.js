@@ -9,11 +9,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 const PLAN_PRICES = {
   pro: {
     name: 'TrackFlow Pro',
-    amount: 14700, // R$ 147,00 em centavos
+    amount: 7990, // R$ 79,90 em centavos
   },
   max: {
     name: 'TrackFlow Max',
-    amount: 29700, // R$ 297,00 em centavos
+    amount: 11990, // R$ 119,90 em centavos
   }
 };
 
