@@ -68,9 +68,8 @@ export async function POST(request) {
         .eq('id', store.id);
     }
 
-    // Criar a sessão de Checkout da Stripe
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
+    // Configuração base da sessão de Checkout
+    const sessionConfig = {
       payment_method_types: ['card'],
       line_items: [
         {
@@ -95,7 +94,43 @@ export async function POST(request) {
         storeId: store.id,
         planId: planId
       }
-    });
+    };
+
+    // Criar a sessão de Checkout da Stripe
+    let session;
+    try {
+      session = await stripe.checkout.sessions.create({
+        ...sessionConfig,
+        customer: customerId,
+      });
+    } catch (checkoutErr) {
+      // Se o erro for de cliente não encontrado (provavelmente migração Test -> Live)
+      if (checkoutErr.code === 'resource_missing' && checkoutErr.param === 'customer') {
+        console.log('Cliente não encontrado na Stripe. Criando um novo...');
+        const newCustomer = await stripe.customers.create({
+          email: user.email,
+          metadata: {
+            storeId: store.id,
+            userId: user.id
+          }
+        });
+        customerId = newCustomer.id;
+
+        // Atualiza o banco com o ID válido de produção
+        await supabase
+          .from('stores')
+          .update({ stripe_customer_id: customerId })
+          .eq('id', store.id);
+
+        // Tenta criar a sessão novamente com o novo cliente
+        session = await stripe.checkout.sessions.create({
+          ...sessionConfig,
+          customer: customerId,
+        });
+      } else {
+        throw checkoutErr; // Se for outro erro, joga pro catch principal
+      }
+    }
 
     return NextResponse.redirect(session.url, 303);
   } catch (err) {
