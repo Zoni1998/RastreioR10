@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '../../../utils/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 // Endpoint para a Nuvemshop disparar Webhooks de pedidos (criado/atualizado)
 export async function POST(request) {
