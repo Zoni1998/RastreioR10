@@ -1,8 +1,7 @@
 import { createClient } from '../../utils/supabase/server';
 import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
-import { Settings, Users, DollarSign, Store, Package, RefreshCw, Eye } from 'lucide-react';
-import { updateStorePlan, forceSyncStoreAction } from './actions';
+import { Activity, DollarSign, Store, Package, AlertTriangle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -95,10 +94,10 @@ export default async function AdminPage() {
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px', animation: 'fadeIn 0.5s ease-out' }}>
       <header style={{ marginBottom: '32px' }}>
-        <h1 style={{ margin: '0 0 8px 0', fontSize: '2rem', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <Settings size={28} color="var(--primary)" /> Comando Central (Admin)
+        <h1 style={{ margin: '0 0 8px 0', fontSize: '2rem', display: 'flex', alignItems: 'center', gap: '12px', color: '#8b5cf6' }}>
+          <Activity size={28} /> Comando Central
         </h1>
-        <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Bem-vindo, Fundador. Aqui está o panorama do seu império.</p>
+        <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Bem-vindo, Fundador. Visão global de receita e retenção do seu SaaS.</p>
       </header>
 
       {/* Cards de Métricas */}
@@ -156,103 +155,51 @@ export default async function AdminPage() {
         </div>
       </div>
 
-      {/* Tabela de Lojas/Usuários */}
-      <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-        <div style={{ padding: '24px', borderBottom: '1px solid var(--border)' }}>
-          <h2 style={{ margin: 0, fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Users size={20} color="var(--primary)" /> Base de Clientes
+      </div>
+
+      {/* Churn Prevention Board */}
+      <div className="card" style={{ padding: '24px', border: '1px solid rgba(239, 68, 68, 0.2)', background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, var(--surface) 100%)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <h2 style={{ margin: 0, fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444' }}>
+            <AlertTriangle size={20} /> Prevenção de Churn (Risco de Cancelamento)
           </h2>
+          <Link href="/admin/clientes" className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 12px', fontSize: '0.85rem' }}>
+            Ver todos clientes <ArrowRight size={14} />
+          </Link>
         </div>
         
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead style={{ backgroundColor: 'var(--background)', borderBottom: '1px solid var(--border)' }}>
-              <tr>
-                <th style={{ padding: '16px 24px', fontWeight: '500', color: 'var(--text-secondary)' }}>Cliente</th>
-                <th style={{ padding: '16px 24px', fontWeight: '500', color: 'var(--text-secondary)' }}>Saúde</th>
-                <th style={{ padding: '16px 24px', fontWeight: '500', color: 'var(--text-secondary)' }}>Métricas do Cliente</th>
-                <th style={{ padding: '16px 24px', fontWeight: '500', color: 'var(--text-secondary)' }}>Ações / Plano</th>
-              </tr>
-            </thead>
-            <tbody>
-              {storesWithStats.map((store) => (
-                <tr key={store.id} style={{ borderBottom: '1px solid var(--border)', transition: 'background-color 0.2s' }}>
-                  <td style={{ padding: '16px 24px' }}>
-                    <div style={{ fontWeight: '500' }}>{store.store_domain || 'N/A'}</div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{store.email}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Criado em: {new Date(store.created_at).toLocaleDateString('pt-BR')}</div>
-                  </td>
-                  <td style={{ padding: '16px 24px' }}>
-                    {store.isConnected ? (
-                      <span className="badge success">App Instalado</span>
-                    ) : (
-                      <span className="badge danger">Falta Instalar</span>
-                    )}
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
-                      Uso Mês: {store.orders_this_month || 0}
-                    </div>
-                  </td>
-                  <td style={{ padding: '16px 24px' }}>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Pedidos Totais: <strong style={{color:'var(--text-primary)'}}>{store.totalOrders}</strong></div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Faturamento (Depois): <strong style={{color:'var(--success)'}}>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(store.revenueAfter)}</strong></div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Faturamento (Antes): {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(store.revenueBefore)}</div>
-                  </td>
-                  <td style={{ padding: '16px 24px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <span className={`badge ${store.current_plan === 'max' ? 'success' : store.current_plan === 'pro' ? 'warning' : ''}`} style={{ textTransform: 'capitalize', alignSelf: 'flex-start' }}>
-                        {store.current_plan || 'start'}
-                      </span>
-                      <form action={updateStorePlan} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <input type="hidden" name="storeId" value={store.id} />
-                        <select 
-                          name="plan" 
-                          defaultValue={store.current_plan || 'start'}
-                          style={{ padding: '6px', borderRadius: '6px', border: '1px solid var(--border)', backgroundColor: 'var(--background)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
-                        >
-                          <option value="start">Start (Grátis)</option>
-                          <option value="pro">Pro</option>
-                          <option value="max">Max</option>
-                        </select>
-                        <button type="submit" className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '0.85rem' }}>
-                          Salvar
-                        </button>
-                      </form>
-                      
-                      <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                        <form action={forceSyncStoreAction}>
-                          <input type="hidden" name="storeId" value={store.id} />
-                          <button 
-                            type="submit" 
-                            className="btn btn-outline" 
-                            style={{ padding: '6px 12px', fontSize: '0.80rem', display: 'flex', alignItems: 'center', gap: '4px' }}
-                            title="Forçar Sincronização da Nuvemshop"
-                          >
-                            <RefreshCw size={14} /> Sincronizar
-                          </button>
-                        </form>
-                        <Link 
-                          href={`/?view_as_store=${store.id}`} 
-                          target="_blank"
-                          className="btn" 
-                          style={{ padding: '6px 12px', fontSize: '0.80rem', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}
-                          title="Acessar painel como este cliente"
-                        >
-                          <Eye size={14} /> Espionar
-                        </Link>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {storesWithStats.length === 0 && (
-                <tr>
-                  <td colSpan="4" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                    Nenhuma loja encontrada.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '0.9rem' }}>
+          Lojas que possuem o App instalado mas não sincronizaram pedidos nos últimos 3 dias. Elas podem ter parado de vender ou o token expirou. Entre em contato!
+        </p>
+
+        <div style={{ display: 'grid', gap: '12px' }}>
+          {storesWithStats
+            .map(store => {
+              const storeOrders = allOrders.filter(o => o.store_id === store.id);
+              const recentOrders = storeOrders.filter(o => {
+                const diff = new Date() - new Date(o.purchase_date);
+                return diff < 3 * 24 * 60 * 60 * 1000;
+              });
+              const churnRisk = store.isConnected && recentOrders.length === 0;
+              return { ...store, churnRisk };
+            })
+            .filter(s => s.churnRisk)
+            .map(store => (
+              <div key={store.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', backgroundColor: 'var(--background)', borderRadius: '8px', borderLeft: '4px solid #ef4444' }}>
+                <div>
+                  <h4 style={{ margin: '0 0 4px 0', fontSize: '1rem', color: 'var(--text-primary)' }}>{store.store_domain || 'Loja Desconhecida'}</h4>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{store.email}</p>
+                </div>
+                <Link href={`/?view_as_store=${store.id}`} target="_blank" className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '0.85rem', display: 'flex', gap: '4px', alignItems: 'center' }}>
+                  <Eye size={14} /> Investigar Conta
+                </Link>
+              </div>
+          ))}
+          {storesWithStats.filter(s => s.isConnected && allOrders.filter(o => o.store_id === s.id && (new Date() - new Date(o.purchase_date)) < 3*24*60*60*1000).length === 0).length === 0 && (
+            <div style={{ padding: '24px', textAlign: 'center', color: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px' }}>
+              Nenhuma loja em risco imediato. Bom trabalho!
+            </div>
+          )}
         </div>
       </div>
     </div>
