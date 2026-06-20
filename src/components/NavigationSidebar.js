@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { logout } from '../app/auth/actions';
 
-export default function NavigationSidebar({ storeName, isAdmin }) {
+export default function NavigationSidebar({ storeName, isAdmin, adminEmail }) {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith('/admin');
 
@@ -102,6 +102,11 @@ export default function NavigationSidebar({ storeName, isAdmin }) {
           </Link>
         )}
         
+        <a href={`mailto:${adminEmail}?subject=Suporte Lojista TrackFlow`} className="nav-link" style={{ marginTop: isAdmin ? '8px' : 'auto', color: 'var(--text-secondary)' }}>
+          <Shield size={20} />
+          Falar com Suporte
+        </a>
+
         <form action={logout}>
           <button type="submit" className="nav-link" style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', color: 'var(--danger)', marginTop: '8px' }}>
             <LogOut size={20} />

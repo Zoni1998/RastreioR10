@@ -14,6 +14,7 @@ import { createClient } from '../utils/supabase/server';
 import NavigationSidebar from '../components/NavigationSidebar';
 import { ThemeProvider } from '../components/ThemeProvider';
 import ThemeSwitcher from '../components/ThemeSwitcher';
+import SupportButton from '../components/SupportButton';
 
 export default async function RootLayout({ children }) {
   const supabase = await createClient();
@@ -25,6 +26,7 @@ export default async function RootLayout({ children }) {
         <body className={outfit.className} suppressHydrationWarning>
           <main style={{ minHeight: '100vh', display: 'flex', backgroundColor: 'var(--background)' }}>
             {children}
+            <SupportButton adminEmail={process.env.ADMIN_EMAIL} />
           </main>
         </body>
       </html>
@@ -48,7 +50,7 @@ export default async function RootLayout({ children }) {
       <body className={outfit.className} suppressHydrationWarning>
         <ThemeProvider initialTheme={initialTheme} initialCustomColors={initialCustomColors} storeId={storeId}>
           <div className="layout-container">
-            <NavigationSidebar storeName={storeName} isAdmin={user?.email === process.env.ADMIN_EMAIL} />
+            <NavigationSidebar storeName={storeName} isAdmin={user?.email === process.env.ADMIN_EMAIL} adminEmail={process.env.ADMIN_EMAIL} />
             
             <main className="main-content">
               {children}
