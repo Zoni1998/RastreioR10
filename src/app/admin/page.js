@@ -1,7 +1,7 @@
 import { createClient } from '../../utils/supabase/server';
 import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
-import { Activity, DollarSign, Store, Package, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Activity, DollarSign, Store, Package, AlertTriangle, ArrowRight, Eye } from 'lucide-react';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -153,8 +153,6 @@ export default async function AdminPage() {
             </div>
           </div>
         </div>
-      </div>
-
       </div>
 
       {/* Churn Prevention Board */}
