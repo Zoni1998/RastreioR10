@@ -6,16 +6,24 @@ import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Dashboard() {
+export default async function Dashboard({ searchParams }) {
+  const params = await searchParams;
+  const viewAsStore = params?.view_as_store;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Pegar a loja do usuário atual
-  const { data: store } = await supabase
-    .from('stores')
-    .select('*')
-    .eq('user_id', user.id)
-    .single();
+  if (!user) return <div>Redirecionando...</div>;
+
+  // Pegar a loja (suporta Impersonation pelo Admin)
+  let storeQuery = supabase.from('stores').select('*');
+  if (viewAsStore && user.email === process.env.ADMIN_EMAIL) {
+    storeQuery = storeQuery.eq('id', viewAsStore);
+  } else {
+    storeQuery = storeQuery.eq('user_id', user.id);
+  }
+
+  const { data: store } = await storeQuery.single();
 
   if (!store) {
     const clientId = process.env.NUVEMSHOP_CLIENT_ID || '';

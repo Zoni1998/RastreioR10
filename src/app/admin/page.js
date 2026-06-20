@@ -1,8 +1,9 @@
 import { createClient } from '../../utils/supabase/server';
 import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
-import { Settings, Users, DollarSign, Store, Package } from 'lucide-react';
-import { updateStorePlan } from './actions';
+import { Settings, Users, DollarSign, Store, Package, RefreshCw, Eye } from 'lucide-react';
+import { updateStorePlan, forceSyncStoreAction } from './actions';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
@@ -216,6 +217,29 @@ export default async function AdminPage() {
                           Salvar
                         </button>
                       </form>
+                      
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                        <form action={forceSyncStoreAction}>
+                          <input type="hidden" name="storeId" value={store.id} />
+                          <button 
+                            type="submit" 
+                            className="btn btn-outline" 
+                            style={{ padding: '6px 12px', fontSize: '0.80rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                            title="Forçar Sincronização da Nuvemshop"
+                          >
+                            <RefreshCw size={14} /> Sincronizar
+                          </button>
+                        </form>
+                        <Link 
+                          href={`/?view_as_store=${store.id}`} 
+                          target="_blank"
+                          className="btn" 
+                          style={{ padding: '6px 12px', fontSize: '0.80rem', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}
+                          title="Acessar painel como este cliente"
+                        >
+                          <Eye size={14} /> Espionar
+                        </Link>
+                      </div>
                     </div>
                   </td>
                 </tr>

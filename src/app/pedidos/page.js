@@ -7,10 +7,21 @@ export const dynamic = 'force-dynamic';
 export default async function PedidosPage({ searchParams }) {
   const params = await searchParams;
   const filter = params?.filter || 'todos';
+  const viewAsStore = params?.view_as_store;
+  const viewParam = viewAsStore ? `&view_as_store=${viewAsStore}` : '';
   
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const { data: store } = await supabase.from('stores').select('id, nuvemshop_store_id, store_domain, whatsapp_message, current_plan, orders_this_month').eq('user_id', user.id).single();
+  if (!user) return <div>Redirecionando...</div>;
+
+  let storeQuery = supabase.from('stores').select('id, nuvemshop_store_id, store_domain, whatsapp_message, current_plan, orders_this_month');
+  if (viewAsStore && user.email === process.env.ADMIN_EMAIL) {
+    storeQuery = storeQuery.eq('id', viewAsStore);
+  } else {
+    storeQuery = storeQuery.eq('user_id', user.id);
+  }
+
+  const { data: store } = await storeQuery.single();
 
   if (!store) return <div style={{padding: '32px'}}>Nenhuma loja conectada.</div>;
 
@@ -86,12 +97,12 @@ export default async function PedidosPage({ searchParams }) {
 
       <div className="card" style={{ padding: '16px', marginBottom: '24px', display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
         <Filter size={20} color="var(--text-secondary)" style={{ marginRight: '8px' }} />
-        <Link href="/pedidos?filter=todos" className={`btn ${filter === 'todos' ? '' : 'btn-outline'}`}>Todos</Link>
-        <Link href="/pedidos?filter=pendentes" className={`btn ${filter === 'pendentes' ? '' : 'btn-outline'}`}>Pendentes</Link>
-        <Link href="/pedidos?filter=pronto" className={`btn ${filter === 'pronto' ? '' : 'btn-outline'}`}>Pronto p/ Envio</Link>
-        <Link href="/pedidos?filter=transito" className={`btn ${filter === 'transito' ? '' : 'btn-outline'}`}>Em Trânsito</Link>
-        <Link href="/pedidos?filter=atrasados" className={`btn ${filter === 'atrasados' ? '' : 'btn-outline'}`}>Atrasados</Link>
-        <Link href="/pedidos?filter=entregues" className={`btn ${filter === 'entregues' ? '' : 'btn-outline'}`}>Entregues</Link>
+        <Link href={`/pedidos?filter=todos${viewParam}`} className={`btn ${filter === 'todos' ? '' : 'btn-outline'}`}>Todos</Link>
+        <Link href={`/pedidos?filter=pendentes${viewParam}`} className={`btn ${filter === 'pendentes' ? '' : 'btn-outline'}`}>Pendentes</Link>
+        <Link href={`/pedidos?filter=pronto${viewParam}`} className={`btn ${filter === 'pronto' ? '' : 'btn-outline'}`}>Pronto p/ Envio</Link>
+        <Link href={`/pedidos?filter=transito${viewParam}`} className={`btn ${filter === 'transito' ? '' : 'btn-outline'}`}>Em Trânsito</Link>
+        <Link href={`/pedidos?filter=atrasados${viewParam}`} className={`btn ${filter === 'atrasados' ? '' : 'btn-outline'}`}>Atrasados</Link>
+        <Link href={`/pedidos?filter=entregues${viewParam}`} className={`btn ${filter === 'entregues' ? '' : 'btn-outline'}`}>Entregues</Link>
       </div>
 
       <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
