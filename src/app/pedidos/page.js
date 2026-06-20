@@ -143,39 +143,61 @@ export default async function PedidosPage({ searchParams }) {
                       <td style={{ padding: '16px 0' }}><span className={`badge ${payBadge}`}>{payText}</span></td>
                       <td style={{ padding: '16px 0' }}><span className={`badge ${shippingBadge}`}>{shippingText}</span></td>
                       <td style={{ padding: '16px 0' }}>
-                        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                          {(order.shipping_status === 'delayed_posting' || order.shipping_status === 'delayed_delivery') && (() => {
-                            const template = store.whatsapp_message || "Olá {cliente}, aqui é da loja. Notamos um pequeno atraso logístico no seu pedido #{pedido} e já estamos acionando a transportadora para resolver!";
-                            const rawMsg = template
-                              .replace(/{cliente}/g, order.customer_name)
-                              .replace(/{pedido}/g, order.order_number);
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                            {(order.shipping_status === 'delayed_posting' || order.shipping_status === 'delayed_delivery') && (() => {
+                              const template = store.whatsapp_message || "Olá {cliente}, aqui é da loja. Notamos um pequeno atraso logístico no seu pedido #{pedido} e já estamos acionando a transportadora para resolver!";
+                              const rawMsg = template
+                                .replace(/{cliente}/g, order.customer_name)
+                                .replace(/{pedido}/g, order.order_number);
+                              
+                              return (
+                                <a 
+                                  href={`https://wa.me/?text=${encodeURIComponent(rawMsg)}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', fontWeight: '500', padding: '6px 12px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px' }}
+                                  title="Avisar cliente no WhatsApp"
+                                >
+                                  <MessageCircle size={16} /> Avisar
+                                </a>
+                              );
+                            })()}
                             
-                            return (
+                            {store.store_domain ? (
                               <a 
-                                href={`https://wa.me/?text=${encodeURIComponent(rawMsg)}`}
-                                target="_blank"
+                                href={`https://${store.store_domain}.lojavirtualnuvem.com.br/admin/orders/${order.nuvemshop_order_id}`} 
+                                target="_blank" 
                                 rel="noreferrer"
-                                style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', fontWeight: '500', padding: '6px 12px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px' }}
-                                title="Avisar cliente no WhatsApp"
+                                style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', fontWeight: '500' }}
                               >
-                                <MessageCircle size={16} /> Avisar
+                                Ver Loja <ExternalLink size={14} />
                               </a>
-                            );
-                          })()}
+                            ) : (
+                              <span style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9rem' }} title="Configure o domínio da loja na aba Configurações">
+                                Link indisponível
+                              </span>
+                            )}
+                          </div>
                           
-                          {store.store_domain ? (
-                            <a 
-                              href={`https://${store.store_domain}.lojavirtualnuvem.com.br/admin/orders/${order.nuvemshop_order_id}`} 
-                              target="_blank" 
-                              rel="noreferrer"
-                              style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', fontWeight: '500' }}
-                            >
-                              Ver <ExternalLink size={14} />
-                            </a>
+                          {/* Código de Rastreio */}
+                          {order.tracking_code ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: '600', backgroundColor: 'var(--surface-hover)', padding: '2px 8px', borderRadius: '4px' }}>
+                                {order.tracking_code}
+                              </span>
+                              <a 
+                                href={`https://parcelsapp.com/pt/tracking/${order.tracking_code}`} 
+                                target="_blank" 
+                                rel="noreferrer"
+                                style={{ color: 'var(--info)', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', fontWeight: '500', fontSize: '0.85rem' }}
+                                title="Rastrear Rota (Global)"
+                              >
+                                Rastrear <ExternalLink size={12} />
+                              </a>
+                            </div>
                           ) : (
-                            <span style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9rem' }} title="Configure o domínio da loja na aba Configurações">
-                              Link indisponível
-                            </span>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Sem rastreio</span>
                           )}
                         </div>
                       </td>
