@@ -93,33 +93,35 @@ export default function NavigationSidebar({ storeName, isAdmin, adminEmail }) {
           <ShoppingCart size={20} />
           Recuperação
         </Link>
-        <Link href="/configuracoes" className={`nav-link ${pathname?.startsWith('/configuracoes') ? 'active' : ''}`} style={{ marginTop: 'auto' }}>
-          <Settings size={20} />
-          Configurações
-        </Link>
-        
-        {isAdmin && (
-          <Link href="/admin" className="nav-link" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', fontWeight: 'bold' }}>
-            <Target size={20} />
-            Modo Fundador (HQ)
+        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <Link href="/configuracoes" className={`nav-link ${pathname?.startsWith('/configuracoes') ? 'active' : ''}`}>
+            <Settings size={20} />
+            Configurações
           </Link>
-        )}
-        
-        <button 
-          onClick={() => setIsSupportModalOpen(true)} 
-          className="nav-link" 
-          style={{ marginTop: isAdmin ? '8px' : 'auto', color: 'var(--text-secondary)', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%', fontSize: '1rem' }}
-        >
-          <Shield size={20} />
-          Falar com Suporte
-        </button>
-
-        <form action={logout}>
-          <button type="submit" className="nav-link" style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', color: 'var(--danger)', marginTop: '8px' }}>
-            <LogOut size={20} />
-            Sair
+          
+          {isAdmin && (
+            <Link href="/admin" className="nav-link" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', fontWeight: 'bold' }}>
+              <Target size={20} />
+              Modo Fundador (HQ)
+            </Link>
+          )}
+          
+          <button 
+            onClick={() => setIsSupportModalOpen(true)} 
+            className="nav-link" 
+            style={{ color: 'var(--text-secondary)', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%', fontSize: '1rem' }}
+          >
+            <Shield size={20} />
+            Falar com Suporte
           </button>
-        </form>
+
+          <form action={logout}>
+            <button type="submit" className="nav-link" style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', color: 'var(--danger)' }}>
+              <LogOut size={20} />
+              Sair
+            </button>
+          </form>
+        </div>
       </nav>
 
       <SupportModal 
