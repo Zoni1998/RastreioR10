@@ -19,20 +19,28 @@ export default function LoginPage() {
         justifyContent: 'center', 
         alignItems: 'center',
         padding: '40px 24px',
-        position: 'relative'
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        <div style={{ width: '100%', maxWidth: '400px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
+        {/* Efeitos de fundo discretos */}
+        <div style={{ position: 'absolute', top: '0', left: '-10%', width: '500px', height: '500px', background: 'var(--primary)', borderRadius: '50%', filter: 'blur(150px)', opacity: '0.08' }}></div>
+        <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '400px', height: '400px', background: 'var(--primary)', borderRadius: '50%', filter: 'blur(120px)', opacity: '0.05' }}></div>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(var(--border) 1px, transparent 1px)', backgroundSize: '32px 32px', opacity: 0.2 }}></div>
+
+        <div style={{ width: '100%', maxWidth: '400px', zIndex: 1 }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
             <div className="glow-logo" style={{ padding: '10px', background: 'var(--primary)', borderRadius: '12px', boxShadow: 'var(--shadow-primary)' }}>
               <Package size={28} color="#fff" />
             </div>
             <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>TrackFlow</span>
           </div>
 
-          <h1 style={{ fontSize: '2rem', marginBottom: '8px', color: 'var(--text-primary)', fontWeight: '700' }}>Bem-vindo de volta</h1>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '32px', fontSize: '1rem' }}>
-            Acesse o seu painel e pare de perder dinheiro com atrasos.
-          </p>
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <h1 style={{ fontSize: '2rem', marginBottom: '8px', color: 'var(--text-primary)', fontWeight: '700' }}>Bem-vindo de volta</h1>
+            <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '1rem' }}>
+              Acesse o seu painel e pare de perder dinheiro com atrasos.
+            </p>
+          </div>
 
           <form action={formAction} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             
