@@ -40,9 +40,14 @@ export default async function RootLayout({ children }) {
     .eq('user_id', user.id)
     .single();
     
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  const cookieTheme = cookieStore.get('trackflow_theme')?.value;
+  const cookieColors = cookieStore.get('trackflow_custom_colors')?.value;
+
   const storeName = store?.store_domain || 'Lojista';
-  const initialTheme = store?.ui_theme || 'dark';
-  const initialCustomColors = store?.ui_custom_colors || {};
+  const initialTheme = store?.ui_theme || cookieTheme || 'dark';
+  const initialCustomColors = store?.ui_custom_colors || (cookieColors ? JSON.parse(cookieColors) : {});
   const storeId = store?.id;
 
   return (

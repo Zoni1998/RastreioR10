@@ -9,6 +9,14 @@ export async function updateThemeAction(theme, customColors) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, error: 'Unauthorized' };
 
+  // Salvar no cookie para manter o tema mesmo que o usuário (como o Admin) não tenha uma loja
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  cookieStore.set('trackflow_theme', theme, { path: '/', maxAge: 60 * 60 * 24 * 365 });
+  if (customColors) {
+    cookieStore.set('trackflow_custom_colors', JSON.stringify(customColors), { path: '/', maxAge: 60 * 60 * 24 * 365 });
+  }
+
   const { error } = await supabase
     .from('stores')
     .update({ 
@@ -18,8 +26,7 @@ export async function updateThemeAction(theme, customColors) {
     .eq('user_id', user.id);
 
   if (error) {
-    console.error('Erro ao atualizar tema:', error);
-    return { success: false, error: error.message };
+    console.error('Erro ao atualizar tema no banco (esperado se for Admin sem loja):', error);
   }
   return { success: true };
 }

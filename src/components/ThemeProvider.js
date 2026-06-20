@@ -124,10 +124,8 @@ export function ThemeProvider({ children, initialTheme = 'dark', initialCustomCo
       setCustomColors(newCustomColors);
     }
     
-    // Salvar no servidor de forma síncrona/background
-    if (storeId) {
-      await updateThemeAction(newTheme, newCustomColors || customColors);
-    }
+    // Salvar no servidor de forma síncrona/background (grava no banco e no cookie)
+    await updateThemeAction(newTheme, newCustomColors || customColors);
   };
 
   return (
