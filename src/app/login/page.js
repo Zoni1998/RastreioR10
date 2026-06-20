@@ -23,7 +23,7 @@ export default function LoginPage() {
       }}>
         <div style={{ width: '100%', maxWidth: '400px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
-            <div style={{ padding: '10px', background: 'var(--primary)', borderRadius: '12px', boxShadow: 'var(--shadow-primary)' }}>
+            <div className="glow-logo" style={{ padding: '10px', background: 'var(--primary)', borderRadius: '12px', boxShadow: 'var(--shadow-primary)' }}>
               <Package size={28} color="#fff" />
             </div>
             <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>TrackFlow</span>
@@ -99,6 +99,7 @@ export default function LoginPage() {
 
             <button 
               type="submit" 
+              className="glow-button"
               disabled={isPending}
               style={{
                 marginTop: '8px',
@@ -189,6 +190,23 @@ export default function LoginPage() {
       <style dangerouslySetInnerHTML={{__html: `
         @media (max-width: 900px) {
           div[style*="flex: 1.2"] { display: none !important; }
+        }
+        
+        .glow-button {
+          transition: all 0.3s ease !important;
+        }
+        .glow-button:hover:not(:disabled) {
+          box-shadow: 0 0 25px var(--primary) !important;
+          transform: translateY(-2px);
+        }
+
+        .glow-logo {
+          transition: all 0.3s ease !important;
+          cursor: pointer;
+        }
+        .glow-logo:hover {
+          box-shadow: 0 0 30px var(--primary) !important;
+          transform: scale(1.1) rotate(-5deg);
         }
       `}} />
     </div>
