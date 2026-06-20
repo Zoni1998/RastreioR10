@@ -74,9 +74,9 @@ export default function LoginPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <label htmlFor="password" style={{ fontSize: '0.9rem', fontWeight: '500', color: 'var(--text-primary)' }}>Senha</label>
-                <a href="/esqueci-senha" style={{ fontSize: '0.85rem', color: 'var(--primary)', textDecoration: 'none', fontWeight: '600', cursor: 'pointer', zIndex: 10 }}>
+                <Link href="/esqueci-senha" style={{ fontSize: '0.85rem', color: 'var(--primary)', textDecoration: 'none', fontWeight: '600' }}>
                   Esqueci minha senha
-                </a>
+                </Link>
               </div>
               <input 
                 id="password" 

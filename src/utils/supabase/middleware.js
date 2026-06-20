@@ -32,7 +32,11 @@ export async function updateSession(request) {
   } = await supabase.auth.getUser()
 
   // Proteger rotas privadas
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/cadastro');
+  const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || 
+                      request.nextUrl.pathname.startsWith('/cadastro') ||
+                      request.nextUrl.pathname.startsWith('/esqueci-senha') ||
+                      request.nextUrl.pathname.startsWith('/nova-senha') ||
+                      request.nextUrl.pathname.startsWith('/auth/callback');
   const isApiRoute = request.nextUrl.pathname.startsWith('/api');
 
   if (!user && !isAuthRoute && !isApiRoute) {
