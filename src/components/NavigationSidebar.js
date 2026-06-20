@@ -1,15 +1,18 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import Link from 'next/link';
 import { 
   LayoutDashboard, Package, Settings, Bell, 
   LogOut, Shield, Users, Activity, Target, ShoppingCart
 } from 'lucide-react';
 import { logout } from '../app/auth/actions';
+import SupportModal from './SupportModal';
 
 export default function NavigationSidebar({ storeName, isAdmin, adminEmail }) {
   const pathname = usePathname();
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const isAdminRoute = pathname?.startsWith('/admin');
 
   if (isAdminRoute && isAdmin) {
@@ -102,10 +105,14 @@ export default function NavigationSidebar({ storeName, isAdmin, adminEmail }) {
           </Link>
         )}
         
-        <a href={`mailto:${adminEmail}?subject=Suporte Lojista TrackFlow`} className="nav-link" style={{ marginTop: isAdmin ? '8px' : 'auto', color: 'var(--text-secondary)' }}>
+        <button 
+          onClick={() => setIsSupportModalOpen(true)} 
+          className="nav-link" 
+          style={{ marginTop: isAdmin ? '8px' : 'auto', color: 'var(--text-secondary)', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%', fontSize: '1rem' }}
+        >
           <Shield size={20} />
           Falar com Suporte
-        </a>
+        </button>
 
         <form action={logout}>
           <button type="submit" className="nav-link" style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', color: 'var(--danger)', marginTop: '8px' }}>
@@ -114,6 +121,12 @@ export default function NavigationSidebar({ storeName, isAdmin, adminEmail }) {
           </button>
         </form>
       </nav>
+
+      <SupportModal 
+        adminEmail={adminEmail} 
+        isOpen={isSupportModalOpen} 
+        onClose={() => setIsSupportModalOpen(false)} 
+      />
     </aside>
   );
 }
