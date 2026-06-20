@@ -4,6 +4,26 @@ import { createClient } from '../utils/supabase/server';
 import { checkOrderDelays } from '../services/trackingService';
 import { revalidatePath } from 'next/cache';
 
+export async function updateThemeAction(theme, customColors) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Unauthorized' };
+
+  const { error } = await supabase
+    .from('stores')
+    .update({ 
+      ui_theme: theme, 
+      ui_custom_colors: customColors 
+    })
+    .eq('user_id', user.id);
+
+  if (error) {
+    console.error('Erro ao atualizar tema:', error);
+    return { success: false, error: error.message };
+  }
+  return { success: true };
+}
+
 export async function syncOrdersAction() {
   try {
     const supabase = await createClient();

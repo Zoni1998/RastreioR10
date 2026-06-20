@@ -12,6 +12,8 @@ export const metadata = {
 
 import { createClient } from '../utils/supabase/server';
 import NavigationSidebar from '../components/NavigationSidebar';
+import { ThemeProvider } from '../components/ThemeProvider';
+import ThemeSwitcher from '../components/ThemeSwitcher';
 
 export default async function RootLayout({ children }) {
   const supabase = await createClient();
@@ -29,20 +31,31 @@ export default async function RootLayout({ children }) {
     );
   }
 
-  // Buscar nome da loja para a saudação
-  const { data: store } = await supabase.from('stores').select('store_domain').eq('user_id', user.id).single();
+  // Buscar informações da loja incluindo as de tema
+  const { data: store } = await supabase
+    .from('stores')
+    .select('id, store_domain, current_plan, ui_theme, ui_custom_colors')
+    .eq('user_id', user.id)
+    .single();
+    
   const storeName = store?.store_domain || 'Lojista';
+  const initialTheme = store?.ui_theme || 'dark';
+  const initialCustomColors = store?.ui_custom_colors || {};
+  const storeId = store?.id;
 
   return (
     <html lang="pt-BR">
       <body className={outfit.className} suppressHydrationWarning>
-        <div className="layout-container">
-          <NavigationSidebar storeName={storeName} isAdmin={user?.email === process.env.ADMIN_EMAIL} />
-          
-          <main className="main-content">
-            {children}
-          </main>
-        </div>
+        <ThemeProvider initialTheme={initialTheme} initialCustomColors={initialCustomColors} storeId={storeId}>
+          <div className="layout-container">
+            <NavigationSidebar storeName={storeName} isAdmin={user?.email === process.env.ADMIN_EMAIL} />
+            
+            <main className="main-content">
+              {children}
+            </main>
+          </div>
+          <ThemeSwitcher currentPlan={store?.current_plan} />
+        </ThemeProvider>
       </body>
     </html>
   );
