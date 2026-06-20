@@ -20,21 +20,36 @@ export async function syncOrdersAction() {
 
     if (storeError || !store) throw new Error('Loja não encontrada no banco.');
 
-    // Buscar pedidos na API da Nuvemshop
-    const response = await fetch(`https://api.tiendanube.com/v1/${store.nuvemshop_store_id}/orders`, {
-      headers: {
-        'Authorization': `Bearer ${store.access_token}`,
-        'User-Agent': 'TrackFlow App (admin@trackflow.com)'
+    // Buscar pedidos na API da Nuvemshop (com paginação para pegar até 1000 pedidos)
+    let ordersData = [];
+    let page = 1;
+
+    while (true) {
+      const response = await fetch(`https://api.tiendanube.com/v1/${store.nuvemshop_store_id}/orders?per_page=200&page=${page}`, {
+        headers: {
+          'Authorization': `Bearer ${store.access_token}`,
+          'User-Agent': 'TrackFlow App (admin@trackflow.com)'
+        }
+      });
+
+      if (!response.ok) {
+        const err = await response.text();
+        console.error('Nuvemshop API Error:', err);
+        throw new Error('Falha ao buscar pedidos na Nuvemshop');
       }
-    });
 
-    if (!response.ok) {
-      const err = await response.text();
-      console.error('Nuvemshop API Error:', err);
-      throw new Error('Falha ao buscar pedidos na Nuvemshop');
+      const pageData = await response.json();
+      ordersData = ordersData.concat(pageData);
+
+      // Se retornou menos de 200, acabaram os pedidos
+      if (pageData.length < 200) {
+        break;
+      }
+      
+      page++;
+      // Limite de segurança de 5 páginas (1000 pedidos) para não dar timeout na Vercel (10 segundos)
+      if (page > 5) break;
     }
-
-    const ordersData = await response.json();
 
     // Mapear e inserir/atualizar no Supabase
     for (const apiOrder of ordersData) {
