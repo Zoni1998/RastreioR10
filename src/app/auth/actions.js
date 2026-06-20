@@ -54,3 +54,46 @@ export async function logout() {
   revalidatePath('/', 'layout')
   redirect('/login')
 }
+
+export async function requestPasswordReset(prevState, formData) {
+  const email = formData.get('email')
+  if (!email) return { success: false, error: 'E-mail obrigatório' }
+
+  const supabase = await createClient()
+  
+  // O redirect to callback que vamos criar
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback?next=/nova-senha`
+  })
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  return { success: true }
+}
+
+export async function updatePassword(prevState, formData) {
+  const password = formData.get('password')
+  const confirmPassword = formData.get('confirmPassword')
+
+  if (!password || password.length < 6) {
+    return { success: false, error: 'A senha deve ter pelo menos 6 caracteres' }
+  }
+
+  if (password !== confirmPassword) {
+    return { success: false, error: 'As senhas não coincidem' }
+  }
+
+  const supabase = await createClient()
+  
+  const { error } = await supabase.auth.updateUser({
+    password: password
+  })
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  redirect('/')
+}
