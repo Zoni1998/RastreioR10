@@ -55,10 +55,10 @@ export async function checkOrderDelays(storeId) {
 
       // Se o status mudou para um estado de atraso, atualizar o banco e notificar
       if (newStatus !== order.shipping_status) {
-        // Atualizar status do pedido
+        // Atualizar status do pedido e marcar que sofreu atraso
         await supabase
           .from('orders')
-          .update({ shipping_status: newStatus })
+          .update({ shipping_status: newStatus, was_delayed_once: true })
           .eq('id', order.id);
 
         // Criar notificação para o gestor da loja

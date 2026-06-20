@@ -1,6 +1,6 @@
 import { createClient } from '../utils/supabase/server';
 import DashboardChart from '../components/DashboardChart';
-import { Package, Truck, AlertTriangle, RefreshCw, PlusCircle, PackageX, Clock, CheckCircle2 } from 'lucide-react';
+import { Package, Truck, AlertTriangle, RefreshCw, PlusCircle, PackageX, Clock, CheckCircle2, DollarSign, ShieldCheck } from 'lucide-react';
 import { syncOrdersAction } from './actions';
 import Link from 'next/link';
 
@@ -61,6 +61,19 @@ export default async function Dashboard() {
   const healthScore = totalOrdersCount > 0 
     ? Math.round(((totalOrdersCount - totalDelayed) / totalOrdersCount) * 100) 
     : 100;
+
+  // Cálculos Financeiros Adicionais
+  const storeCreatedAt = new Date(store.created_at);
+  
+  // Faturamento Monitorado (Pedidos feitos APÓS a instalação do TrackFlow)
+  const revenueAfter = safeOrders
+    .filter(o => new Date(o.purchase_date) >= storeCreatedAt)
+    .reduce((sum, o) => sum + parseFloat(o.total_amount || 0), 0);
+
+  // Receita Salva (Pedidos Entregues que antes estavam Atrasados)
+  const revenueSaved = safeOrders
+    .filter(o => o.shipping_status === 'delivered' && o.was_delayed_once === true)
+    .reduce((sum, o) => sum + parseFloat(o.total_amount || 0), 0);
 
   // Gerar dados para o gráfico baseado nos últimos 6 dias reais
   const chartData = [];
@@ -148,7 +161,7 @@ export default async function Dashboard() {
       })()}
 
       {/* Top Stats Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '24px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '24px' }}>
         
         {/* Receita em Risco Card */}
         <div className="card" style={{ padding: '24px' }}>
@@ -159,16 +172,59 @@ export default async function Dashboard() {
                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valueAtRisk)}
               </h2>
             </div>
-            <div style={{ padding: '12px', backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '12px' }}>
+            <div style={{ padding: '12px', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#dc2626', borderRadius: '12px' }}>
               <AlertTriangle size={24} />
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', fontSize: '0.875rem' }}>
-            <span style={{ color: '#10b981', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ color: valueAtRisk > 0 ? '#dc2626' : '#10b981', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <Truck size={14} /> {(valueAtRisk > 0) ? 'Atenção Necessária' : '0% de risco'}
             </span>
             <span style={{ color: 'var(--text-secondary)', marginLeft: '8px' }}>
               {valueAtRisk > 0 ? `${totalDelayed} vendas comprometidas` : 'Nenhuma venda comprometida'}
+            </span>
+          </div>
+        </div>
+
+        {/* Prejuízo Evitado Card */}
+        <div className="card" style={{ padding: '24px', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, var(--surface) 100%)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+            <div>
+              <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Prejuízo Evitado</p>
+              <h2 style={{ fontSize: '2.25rem', fontWeight: 'bold', color: 'var(--success)', marginTop: '8px', marginBottom: 0 }}>
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(revenueSaved)}
+              </h2>
+            </div>
+            <div style={{ padding: '12px', backgroundColor: 'rgba(16, 185, 129, 0.2)', color: 'var(--success)', borderRadius: '12px' }}>
+              <ShieldCheck size={24} />
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', fontSize: '0.875rem' }}>
+            <span style={{ color: 'var(--success)', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <CheckCircle2 size={14} /> Receita Salva
+            </span>
+            <span style={{ color: 'var(--text-secondary)', marginLeft: '8px' }}>
+              Graças ao TrackFlow
+            </span>
+          </div>
+        </div>
+
+        {/* Faturamento Monitorado Card */}
+        <div className="card" style={{ padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+            <div>
+              <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Vendas Monitoradas</p>
+              <h2 style={{ fontSize: '2.25rem', fontWeight: 'bold', color: 'var(--text-primary)', marginTop: '8px', marginBottom: 0 }}>
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(revenueAfter)}
+              </h2>
+            </div>
+            <div style={{ padding: '12px', backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderRadius: '12px' }}>
+              <DollarSign size={24} />
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', fontSize: '0.875rem' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>
+              Faturamento passando pelo TrackFlow
             </span>
           </div>
         </div>
