@@ -111,6 +111,27 @@ export default async function Dashboard({ searchParams }) {
   // Pegar os 5 mais recentes
   const recentOrders = safeOrders.slice(0, 5);
 
+  // Performance de Transportadoras
+  const shippingStats = {};
+  safeOrders.forEach(o => {
+    if (o.shipping_company && o.shipping_company !== 'Desconhecido') {
+      if (!shippingStats[o.shipping_company]) {
+        shippingStats[o.shipping_company] = { total: 0, delayed: 0 };
+      }
+      shippingStats[o.shipping_company].total++;
+      if (o.shipping_status === 'delayed_posting' || o.shipping_status === 'delayed_delivery' || (o.shipping_status === 'delivered' && o.was_delayed_once)) {
+        shippingStats[o.shipping_company].delayed++;
+      }
+    }
+  });
+
+  const carriersArray = Object.keys(shippingStats).map(name => {
+    const total = shippingStats[name].total;
+    const delayed = shippingStats[name].delayed;
+    const percentDelayed = total > 0 ? (delayed / total) * 100 : 0;
+    return { name, total, delayed, percentDelayed };
+  }).sort((a, b) => b.percentDelayed - a.percentDelayed).slice(0, 5);
+
   return (
     <div>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
@@ -316,10 +337,68 @@ export default async function Dashboard({ searchParams }) {
       </div>
 
       {/* Gráfico */}
-      <div className="card" style={{ marginBottom: '32px' }}>
-        <h2 style={{ fontSize: '1.25rem', marginTop: 0, marginBottom: '24px' }}>Desempenho Diário</h2>
-        <div style={{ width: '100%', height: '300px' }}>
-          <DashboardChart data={chartData} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+        <div className="card" style={{ flex: 1 }}>
+          <h2 style={{ fontSize: '1.25rem', marginTop: 0, marginBottom: '24px' }}>Desempenho Diário</h2>
+          <div style={{ width: '100%', height: '300px' }}>
+            <DashboardChart data={chartData} />
+          </div>
+        </div>
+
+        {/* Analytics de Transportadoras */}
+        <div className="card" style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '1.25rem', marginTop: 0, marginBottom: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Truck size={20} color="#3b82f6" /> Performance Logística
+            </h2>
+            {store.current_plan !== 'max' && (
+              <span className="badge warning">Exclusivo MAX</span>
+            )}
+          </div>
+
+          {store.current_plan !== 'max' && (
+             <div style={{
+              position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+              backdropFilter: 'blur(4px)', backgroundColor: 'rgba(15, 23, 42, 0.4)',
+              zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px', textAlign: 'center'
+            }}>
+              <p style={{ color: 'white', marginBottom: '16px', fontWeight: '500', maxWidth: '300px' }}>
+                Descubra qual transportadora gera mais dor de cabeça e prejuízo.
+              </p>
+              <Link href="/assinatura" className="btn" style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%)', border: 'none', padding: '8px 16px' }}>
+                Desbloquear Logística
+              </Link>
+            </div>
+          )}
+
+          <div style={{ filter: store.current_plan !== 'max' ? 'blur(3px)' : 'none' }}>
+            {carriersArray.length === 0 ? (
+              <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '40px 0' }}>Sem dados suficientes de transportadoras.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {carriersArray.map(carrier => (
+                  <div key={carrier.name} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem' }}>
+                      <span style={{ fontWeight: '500' }}>{carrier.name}</span>
+                      <span style={{ color: carrier.percentDelayed > 15 ? 'var(--danger)' : carrier.percentDelayed > 5 ? 'var(--warning)' : 'var(--success)', fontWeight: 'bold' }}>
+                        {carrier.percentDelayed.toFixed(1)}% de atraso
+                      </span>
+                    </div>
+                    <div style={{ width: '100%', height: '6px', backgroundColor: 'var(--surface-hover)', borderRadius: '3px', overflow: 'hidden' }}>
+                      <div style={{ 
+                        height: '100%', 
+                        width: `${carrier.percentDelayed}%`, 
+                        backgroundColor: carrier.percentDelayed > 15 ? 'var(--danger)' : carrier.percentDelayed > 5 ? 'var(--warning)' : 'var(--success)'
+                      }} />
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                      {carrier.delayed} de {carrier.total} pacotes sofreram atraso.
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

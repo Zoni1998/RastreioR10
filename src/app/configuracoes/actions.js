@@ -10,6 +10,9 @@ export async function updateStoreConfig(formData) {
   const storeDomain = formData.get('store_domain') || null;
   const whatsappMessage = formData.get('whatsapp_message') || '';
   const emailAlerts = formData.get('email_alerts') === 'on';
+  const templatePending = formData.get('template_pending');
+  const templateShipped = formData.get('template_shipped');
+  const templateDelayed = formData.get('template_delayed');
 
   if (isNaN(postingDays) || isNaN(deliveryDays)) {
     return { success: false, error: 'Dados inválidos' };
@@ -19,15 +22,20 @@ export async function updateStoreConfig(formData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, error: 'Não autorizado' };
 
-  const { error } = await supabase
-    .from('stores')
-    .update({ 
+    const updateData = { 
       posting_delay_days: postingDays,
       delivery_delay_days: deliveryDays,
       store_domain: storeDomain,
-      whatsapp_message: whatsappMessage,
       email_alerts: emailAlerts
-    })
+    };
+
+    if (templatePending !== null) updateData.template_pending = templatePending;
+    if (templateShipped !== null) updateData.template_shipped = templateShipped;
+    if (templateDelayed !== null) updateData.template_delayed = templateDelayed;
+
+  const { error } = await supabase
+    .from('stores')
+    .update(updateData)
     .eq('id', storeId)
     .eq('user_id', user.id); // Segurança extra
 

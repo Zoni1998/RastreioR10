@@ -24,7 +24,7 @@ export default async function PedidosPage({ searchParams }) {
     );
   }
 
-  let storeQuery = activeClient.from('stores').select('id, nuvemshop_store_id, store_domain, whatsapp_message, current_plan, orders_this_month');
+  let storeQuery = activeClient.from('stores').select('id, nuvemshop_store_id, store_domain, whatsapp_message, current_plan, orders_this_month, template_delayed, template_shipped, template_pending');
   if (viewAsStore && user.email === process.env.ADMIN_EMAIL) {
     storeQuery = storeQuery.eq('id', viewAsStore);
   } else {
@@ -166,11 +166,23 @@ export default async function PedidosPage({ searchParams }) {
                       <td style={{ padding: '16px 0' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                           <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                            {(order.shipping_status === 'delayed_posting' || order.shipping_status === 'delayed_delivery') && (() => {
-                              const template = store.whatsapp_message || "Olá {cliente}, aqui é da loja. Notamos um pequeno atraso logístico no seu pedido #{pedido} e já estamos acionando a transportadora para resolver!";
+                            {(() => {
+                              let template = '';
+                              if (order.payment_status === 'pending') {
+                                template = store.template_pending || 'Olá [NomeCliente], tudo bem? Notei que você iniciou um pedido ([NumeroPedido]) mas o pagamento ainda está pendente. Ficou com alguma dúvida ou teve algum problema na hora de pagar?';
+                              } else if (order.shipping_status === 'delayed_posting' || order.shipping_status === 'delayed_delivery') {
+                                template = store.template_delayed || 'Olá [NomeCliente], vi que o seu pedido [NumeroPedido] está demorando um pouco mais do que o esperado na transportadora. Já estou acompanhando de perto para você, ok?';
+                              } else if (order.shipping_status === 'shipped') {
+                                template = store.template_shipped || 'Olá [NomeCliente], boa notícia! Seu pedido [NumeroPedido] já foi enviado e está a caminho. Você pode acompanhar por este código: [CodigoRastreio].';
+                              } else {
+                                // Default fallback for other states (e.g. Delivered)
+                                template = 'Olá [NomeCliente], aqui é da loja sobre o seu pedido [NumeroPedido].';
+                              }
+
                               const rawMsg = template
-                                .replace(/{cliente}/g, order.customer_name)
-                                .replace(/{pedido}/g, order.order_number);
+                                .replace(/\[NomeCliente\]/g, order.customer_name)
+                                .replace(/\[NumeroPedido\]/g, order.order_number)
+                                .replace(/\[CodigoRastreio\]/g, order.tracking_code || 'ainda não gerado');
                               
                               return (
                                 <a 
@@ -178,9 +190,9 @@ export default async function PedidosPage({ searchParams }) {
                                   target="_blank"
                                   rel="noreferrer"
                                   style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', fontWeight: '500', padding: '6px 12px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px' }}
-                                  title="Avisar cliente no WhatsApp"
+                                  title="Enviar mensagem no WhatsApp"
                                 >
-                                  <MessageCircle size={16} /> Avisar
+                                  <MessageCircle size={16} /> Zap
                                 </a>
                               );
                             })()}

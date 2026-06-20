@@ -107,6 +107,7 @@ export async function forceSyncStoreAction(formData) {
       payment_status: apiOrder.payment_status || 'pending',
       tracking_code: apiOrder.shipping_tracking_number || null,
       shipped_at: apiOrder.shipped_at ? new Date(apiOrder.shipped_at).toISOString() : null,
+      shipping_company: apiOrder.shipping_option || 'Desconhecido',
     };
 
     // Tenta não sobrescrever atraso (usando Admin Role)

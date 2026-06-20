@@ -10,7 +10,7 @@ export default async function ConfiguracoesPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
     // Pegar a loja do usuário e contagem de pedidos
-  const { data: store } = await supabase.from('stores').select('id, nuvemshop_store_id, posting_delay_days, delivery_delay_days, store_domain, created_at, whatsapp_message, email_alerts, current_plan').eq('user_id', user.id).single();
+  const { data: store } = await supabase.from('stores').select('id, nuvemshop_store_id, posting_delay_days, delivery_delay_days, store_domain, created_at, whatsapp_message, email_alerts, current_plan, template_delayed, template_shipped, template_pending').eq('user_id', user.id).single();
 
   if (!store) {
     return (
@@ -23,9 +23,11 @@ export default async function ConfiguracoesPage() {
 
   const postingDays = store.posting_delay_days || 7;
   const deliveryDays = store.delivery_delay_days || 25;
-  const defaultMessage = "Olá {cliente}, aqui é da loja. Notamos um pequeno atraso logístico no seu pedido #{pedido} e já estamos acionando a transportadora para resolver!";
-  const whatsappMessage = store.whatsapp_message || defaultMessage;
-  const planName = store.current_plan === 'pro' ? 'Plano Pro' : 'Plano Start';
+  const planName = store.current_plan === 'max' ? 'Plano Max' : store.current_plan === 'pro' ? 'Plano Pro' : 'Plano Start';
+  
+  const templateDelayed = store.template_delayed || 'Olá [NomeCliente], vi que o seu pedido [NumeroPedido] está demorando um pouco mais do que o esperado na transportadora. Já estou acompanhando de perto para você, ok?';
+  const templateShipped = store.template_shipped || 'Olá [NomeCliente], boa notícia! Seu pedido [NumeroPedido] já foi enviado e está a caminho. Você pode acompanhar por este código: [CodigoRastreio].';
+  const templatePending = store.template_pending || 'Olá [NomeCliente], tudo bem? Notei que você iniciou um pedido ([NumeroPedido]) mas o pagamento ainda está pendente. Ficou com alguma dúvida ou teve algum problema na hora de pagar?';
 
   return (
     <div>
@@ -98,40 +100,63 @@ export default async function ConfiguracoesPage() {
               />
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', backgroundColor: 'var(--background)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label htmlFor="whatsapp_message" style={{ fontWeight: '500', fontSize: '1rem' }}>Mensagem Padrão do WhatsApp</label>
+                <label style={{ fontWeight: '500', fontSize: '1.1rem', color: '#10b981' }}>Templates do WhatsApp</label>
                 {store.current_plan === 'start' && (
                   <span className="badge warning" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    🔒 Exclusivo PRO
+                    🔒 Exclusivo PRO & MAX
                   </span>
                 )}
               </div>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 8px 0' }}>
-                Use <b>{`{cliente}`}</b> para o nome do comprador e <b>{`{pedido}`}</b> para o número do pedido.
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 -8px 0' }}>
+                Variáveis disponíveis: <b>[NomeCliente]</b>, <b>[NumeroPedido]</b>, <b>[CodigoRastreio]</b>.
               </p>
               
               {store.current_plan === 'start' ? (
-                <div style={{ padding: '16px', backgroundColor: 'var(--background)', borderRadius: '8px', border: '1px dashed var(--border)', textAlign: 'center' }}>
+                <div style={{ padding: '24px', backgroundColor: 'var(--surface)', borderRadius: '8px', border: '1px dashed var(--border)', textAlign: 'center' }}>
                   <p style={{ margin: '0 0 16px 0', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-                    Personalização de mensagens de WhatsApp está disponível apenas nos planos Pro e Max.
+                    A criação de mensagens automáticas para recuperação e envios está disponível apenas nos planos pagos.
                   </p>
                   <Link href="/assinatura" className="btn" style={{ textDecoration: 'none', display: 'inline-block' }}>
-                    Desbloquear Personalização
+                    Desbloquear Templates
                   </Link>
                 </div>
               ) : (
-                <textarea 
-                  id="whatsapp_message" 
-                  name="whatsapp_message" 
-                  defaultValue={whatsappMessage}
-                  rows={3}
-                  style={{
-                    padding: '12px', borderRadius: '8px', border: '1px solid var(--border)',
-                    backgroundColor: 'var(--background)', color: 'var(--text-primary)',
-                    fontSize: '1rem', fontFamily: 'inherit', resize: 'vertical'
-                  }}
-                />
+                <>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label htmlFor="template_pending" style={{ fontSize: '0.95rem', color: 'var(--warning)' }}>Template: Carrinho / Aguardando Pagamento</label>
+                    <textarea 
+                      id="template_pending" 
+                      name="template_pending" 
+                      defaultValue={templatePending}
+                      rows={2}
+                      style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--surface)', color: 'var(--text-primary)', fontSize: '0.9rem', fontFamily: 'inherit', resize: 'vertical' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label htmlFor="template_shipped" style={{ fontSize: '0.95rem', color: 'var(--info)' }}>Template: Pedido Enviado</label>
+                    <textarea 
+                      id="template_shipped" 
+                      name="template_shipped" 
+                      defaultValue={templateShipped}
+                      rows={2}
+                      style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--surface)', color: 'var(--text-primary)', fontSize: '0.9rem', fontFamily: 'inherit', resize: 'vertical' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label htmlFor="template_delayed" style={{ fontSize: '0.95rem', color: 'var(--danger)' }}>Template: Pedido Atrasado</label>
+                    <textarea 
+                      id="template_delayed" 
+                      name="template_delayed" 
+                      defaultValue={templateDelayed}
+                      rows={2}
+                      style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--surface)', color: 'var(--text-primary)', fontSize: '0.9rem', fontFamily: 'inherit', resize: 'vertical' }}
+                    />
+                  </div>
+                </>
               )}
             </div>
 

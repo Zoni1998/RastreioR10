@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { 
   LayoutDashboard, Package, Settings, Bell, 
-  LogOut, Shield, Users, Activity, Target
+  LogOut, Shield, Users, Activity, Target, ShoppingCart
 } from 'lucide-react';
 import { logout } from '../app/auth/actions';
 
@@ -85,6 +85,10 @@ export default function NavigationSidebar({ storeName, isAdmin }) {
         <Link href="/alertas" className={`nav-link ${pathname?.startsWith('/alertas') ? 'active' : ''}`}>
           <Bell size={20} />
           Alertas
+        </Link>
+        <Link href="/recuperacao" className={`nav-link ${pathname?.startsWith('/recuperacao') ? 'active' : ''}`} style={{ color: '#10b981' }}>
+          <ShoppingCart size={20} />
+          Recuperação
         </Link>
         <Link href="/configuracoes" className={`nav-link ${pathname?.startsWith('/configuracoes') ? 'active' : ''}`} style={{ marginTop: 'auto' }}>
           <Settings size={20} />
