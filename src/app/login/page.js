@@ -3,7 +3,7 @@
 import { useActionState } from 'react'
 import { login } from '../auth/actions'
 import Link from 'next/link'
-import { Package, ArrowRight, ShieldCheck, Zap } from 'lucide-react'
+import { Package, ArrowRight, ShieldCheck, Zap, Truck, Box } from 'lucide-react'
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(login, null)
@@ -23,9 +23,23 @@ export default function LoginPage() {
         overflow: 'hidden'
       }}>
         {/* Efeitos de fundo discretos */}
-        <div style={{ position: 'absolute', top: '0', left: '-10%', width: '500px', height: '500px', background: 'var(--primary)', borderRadius: '50%', filter: 'blur(150px)', opacity: '0.08' }}></div>
-        <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '400px', height: '400px', background: 'var(--primary)', borderRadius: '50%', filter: 'blur(120px)', opacity: '0.05' }}></div>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(var(--border) 1px, transparent 1px)', backgroundSize: '32px 32px', opacity: 0.2 }}></div>
+        <div style={{ position: 'absolute', top: '0', left: '-10%', width: '500px', height: '500px', background: 'var(--primary)', borderRadius: '50%', filter: 'blur(100px)', opacity: '0.15' }}></div>
+        <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '400px', height: '400px', background: 'var(--primary)', borderRadius: '50%', filter: 'blur(90px)', opacity: '0.12' }}></div>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(var(--primary) 1px, transparent 1px)', backgroundSize: '40px 40px', opacity: 0.15 }}></div>
+
+        {/* Ícones flutuantes decorativos */}
+        <div className="floating-icon" style={{ position: 'absolute', top: '15%', left: '10%', opacity: 0.15, transform: 'rotate(-15deg)' }}>
+          <Package size={64} color="var(--primary)" />
+        </div>
+        <div className="floating-icon" style={{ position: 'absolute', bottom: '20%', left: '8%', opacity: 0.12, transform: 'rotate(15deg)' }}>
+          <Truck size={48} color="var(--primary)" />
+        </div>
+        <div className="floating-icon" style={{ position: 'absolute', top: '25%', right: '12%', opacity: 0.15, transform: 'rotate(25deg)' }}>
+          <Box size={56} color="var(--primary)" />
+        </div>
+        <div className="floating-icon" style={{ position: 'absolute', bottom: '15%', right: '15%', opacity: 0.1, transform: 'rotate(-20deg)' }}>
+          <ShieldCheck size={80} color="var(--primary)" />
+        </div>
 
         <div style={{ width: '100%', maxWidth: '400px', zIndex: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
@@ -216,6 +230,18 @@ export default function LoginPage() {
           box-shadow: 0 0 30px var(--primary) !important;
           transform: scale(1.1) rotate(-5deg);
         }
+
+        @keyframes float {
+          0% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-15px) rotate(5deg); }
+          100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .floating-icon {
+          animation: float 6s ease-in-out infinite;
+        }
+        .floating-icon:nth-child(2) { animation-duration: 8s; animation-delay: 1s; }
+        .floating-icon:nth-child(3) { animation-duration: 7s; animation-delay: 2s; }
+        .floating-icon:nth-child(4) { animation-duration: 9s; animation-delay: 0.5s; }
       `}} />
     </div>
   )
