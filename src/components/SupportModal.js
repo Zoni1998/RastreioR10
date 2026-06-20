@@ -91,10 +91,12 @@ export default function SupportModal({ adminEmail, isOpen, onClose }) {
               Fechar
             </button>
             <a 
-              href={`mailto:${adminEmail || 'suporte@trackflow.com'}?subject=Suporte TrackFlow`}
+              href={`https://mail.google.com/mail/?view=cm&fs=1&to=${adminEmail || 'suporte@trackflow.com'}&su=Suporte TrackFlow`}
+              target="_blank"
+              rel="noreferrer"
               style={{ flex: 1, padding: '12px', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', textDecoration: 'none', textAlign: 'center' }}
             >
-              Abrir E-mail
+              Abrir no Gmail
             </a>
           </div>
         </div>
