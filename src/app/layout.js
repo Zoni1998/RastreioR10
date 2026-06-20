@@ -56,7 +56,7 @@ export default async function RootLayout({ children }) {
               {children}
             </main>
           </div>
-          <ThemeSwitcher currentPlan={store?.current_plan} />
+          <ThemeSwitcher currentPlan={store?.current_plan} isAdmin={user?.email === process.env.ADMIN_EMAIL} />
         </ThemeProvider>
       </body>
     </html>

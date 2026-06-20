@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTheme, predefinedThemes } from './ThemeProvider';
 import { Palette, X, Lock } from 'lucide-react';
 
-export default function ThemeSwitcher({ currentPlan }) {
+export default function ThemeSwitcher({ currentPlan, isAdmin }) {
   const { theme, customColors, changeTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [showUpgradeAlert, setShowUpgradeAlert] = useState(false);
@@ -26,13 +26,15 @@ export default function ThemeSwitcher({ currentPlan }) {
   ];
 
   const handleSelectTheme = (t) => {
-    if (t.type === 'pro' && plan === 'start') {
-      setShowUpgradeAlert(true);
-      return;
-    }
-    if (t.type === 'max' && plan !== 'max') {
-      setShowUpgradeAlert(true);
-      return;
+    if (!isAdmin) {
+      if (t.type === 'pro' && plan === 'start') {
+        setShowUpgradeAlert(true);
+        return;
+      }
+      if (t.type === 'max' && plan !== 'max') {
+        setShowUpgradeAlert(true);
+        return;
+      }
     }
     
     setShowUpgradeAlert(false);
@@ -112,7 +114,7 @@ export default function ThemeSwitcher({ currentPlan }) {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginBottom: '32px' }}>
               {themeOptions.map(t => {
                 const isSelected = theme === t.id;
-                const isLocked = (t.type === 'pro' && plan === 'start') || (t.type === 'max' && plan !== 'max');
+                const isLocked = !isAdmin && ((t.type === 'pro' && plan === 'start') || (t.type === 'max' && plan !== 'max'));
                 
                 return (
                   <div key={t.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
@@ -142,7 +144,7 @@ export default function ThemeSwitcher({ currentPlan }) {
               })}
             </div>
 
-            {theme === 'custom' && plan === 'max' && (
+            {theme === 'custom' && (plan === 'max' || isAdmin) && (
               <div style={{ backgroundColor: 'var(--background)', padding: '16px', borderRadius: '12px' }}>
                 <h3 style={{ margin: '0 0 16px 0', fontSize: '1rem' }}>Cores Personalizadas</h3>
                 
