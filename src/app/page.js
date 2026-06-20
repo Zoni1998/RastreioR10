@@ -3,6 +3,7 @@ import DashboardChart from '../components/DashboardChart';
 import { Package, Truck, AlertTriangle, RefreshCw, PlusCircle, PackageX, Clock, CheckCircle2, DollarSign, ShieldCheck } from 'lucide-react';
 import { syncOrdersAction } from './actions';
 import Link from 'next/link';
+import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,8 +16,17 @@ export default async function Dashboard({ searchParams }) {
 
   if (!user) return <div>Redirecionando...</div>;
 
+  // Configurar cliente Supabase apropriado (Admin bypassa RLS)
+  let activeClient = supabase;
+  if (viewAsStore && user.email === process.env.ADMIN_EMAIL) {
+    activeClient = createSupabaseAdmin(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+  }
+
   // Pegar a loja (suporta Impersonation pelo Admin)
-  let storeQuery = supabase.from('stores').select('*');
+  let storeQuery = activeClient.from('stores').select('*');
   if (viewAsStore && user.email === process.env.ADMIN_EMAIL) {
     storeQuery = storeQuery.eq('id', viewAsStore);
   } else {
@@ -44,8 +54,8 @@ export default async function Dashboard({ searchParams }) {
     );
   }
 
-  // Buscar pedidos reais no Supabase
-  const { data: orders } = await supabase
+  // Buscar pedidos reais no banco (usando o client apropriado)
+  const { data: orders } = await activeClient
     .from('orders')
     .select('*')
     .eq('store_id', store.id)

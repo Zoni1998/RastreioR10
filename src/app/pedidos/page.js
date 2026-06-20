@@ -1,6 +1,7 @@
 import { createClient } from '../../utils/supabase/server';
 import { Package, ExternalLink, Filter, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
+import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +15,16 @@ export default async function PedidosPage({ searchParams }) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return <div>Redirecionando...</div>;
 
-  let storeQuery = supabase.from('stores').select('id, nuvemshop_store_id, store_domain, whatsapp_message, current_plan, orders_this_month');
+  // Configurar cliente Supabase apropriado (Admin bypassa RLS)
+  let activeClient = supabase;
+  if (viewAsStore && user.email === process.env.ADMIN_EMAIL) {
+    activeClient = createSupabaseAdmin(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+  }
+
+  let storeQuery = activeClient.from('stores').select('id, nuvemshop_store_id, store_domain, whatsapp_message, current_plan, orders_this_month');
   if (viewAsStore && user.email === process.env.ADMIN_EMAIL) {
     storeQuery = storeQuery.eq('id', viewAsStore);
   } else {
@@ -33,7 +43,7 @@ export default async function PedidosPage({ searchParams }) {
   const isNearLimit = currentLimit !== 'Ilimitado' && percent >= 80;
 
   // Buscar pedidos
-  let query = supabase.from('orders').select('*').eq('store_id', store.id).order('purchase_date', { ascending: false });
+  let query = activeClient.from('orders').select('*').eq('store_id', store.id).order('purchase_date', { ascending: false });
   
   if (filter === 'pendentes') {
     query = query.eq('payment_status', 'pending');
