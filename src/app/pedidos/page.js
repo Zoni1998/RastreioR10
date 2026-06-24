@@ -13,9 +13,8 @@ export default async function PedidosPage({ searchParams }) {
   
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return <div>Redirecionando...</div>;
+  if (!user) return <div className="p-8 text-text-secondary">Redirecionando...</div>;
 
-  // Configurar cliente Supabase apropriado (Admin bypassa RLS)
   let activeClient = supabase;
   if (viewAsStore && user.email === process.env.ADMIN_EMAIL) {
     activeClient = createSupabaseAdmin(
@@ -33,7 +32,7 @@ export default async function PedidosPage({ searchParams }) {
 
   const { data: store } = await storeQuery.single();
 
-  if (!store) return <div style={{padding: '32px'}}>Nenhuma loja conectada.</div>;
+  if (!store) return <div className="p-8 text-text-secondary">Nenhuma loja conectada.</div>;
 
   const currentPlan = store.current_plan || 'start';
   const planLimits = { start: 100, pro: 1000, max: 'Ilimitado' };
@@ -62,77 +61,74 @@ export default async function PedidosPage({ searchParams }) {
   const now = new Date();
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div className="page-header" style={{ marginBottom: '16px' }}>
-        <h1 className="page-title">
-          <Package size={28} color="var(--primary)" style={{ marginRight: '12px', verticalAlign: 'middle' }} />
+    <div className="flex flex-col h-full pb-12">
+      <div className="mb-8">
+        <h1 className="text-3xl font-medium text-text-primary tracking-tight flex items-center gap-3">
+          <Package size={28} className="text-text-secondary" strokeWidth={2} />
           Gestão de Pedidos
         </h1>
       </div>
 
       {/* Banner de Consumo e Upgrade */}
-      <div className="card" style={{ padding: '20px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '24px', borderLeft: isNearLimit ? '4px solid var(--warning)' : '4px solid var(--primary)' }}>
-        <div style={{ flex: '1', minWidth: '300px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>
+      <div className={`flex flex-col md:flex-row justify-between items-start md:items-center gap-6 p-6 mb-8 rounded-xl border ${isNearLimit ? 'border-amber-500/30 bg-amber-500/5' : 'border-border bg-surface/50'} backdrop-blur-sm relative overflow-hidden`}>
+        {isNearLimit && <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500" />}
+        
+        <div className="flex-1 w-full max-w-xl">
+          <div className="flex justify-between mb-2">
+            <span className="font-medium text-text-primary text-sm">
               Cota Mensal de Pedidos ({currentPlan.toUpperCase()})
             </span>
-            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+            <span className="text-text-secondary text-sm font-medium">
               {ordersUsed} / {currentLimit}
             </span>
           </div>
           {currentLimit !== 'Ilimitado' ? (
-            <div style={{ width: '100%', height: '8px', backgroundColor: 'var(--background)', borderRadius: '4px', overflow: 'hidden' }}>
-              <div style={{ 
-                height: '100%', 
-                width: `${percent}%`, 
-                backgroundColor: isNearLimit ? 'var(--warning)' : 'var(--primary)',
-                transition: 'width 0.5s ease-out'
-              }} />
+            <div className="w-full h-2 bg-background rounded-full overflow-hidden border border-border">
+              <div className={`h-full ${isNearLimit ? 'bg-amber-500' : 'bg-zinc-100'} transition-all duration-500 ease-out`} style={{ width: `${percent}%` }} />
             </div>
           ) : (
-             <div style={{ width: '100%', height: '8px', background: 'linear-gradient(90deg, #10b981, #3b82f6)', borderRadius: '4px' }} />
+            <div className="w-full h-2 rounded-full overflow-hidden border border-border bg-[linear-gradient(90deg,#3b82f6,#8b5cf6)]" />
           )}
           {isNearLimit && currentLimit !== 'Ilimitado' && (
-             <p style={{ margin: '8px 0 0 0', color: 'var(--warning)', fontSize: '0.85rem' }}>Você está próximo de atingir o limite do plano.</p>
+            <p className="mt-2 text-amber-500 text-xs font-medium uppercase tracking-wide">⚠️ Você está próximo do limite do plano</p>
           )}
         </div>
         
         {currentPlan !== 'max' && (
-          <Link href="/assinatura" className="btn" style={{ textDecoration: 'none', background: 'linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%)', boxShadow: 'var(--shadow-primary)', border: 'none' }}>
-            ⭐ Fazer Upgrade de Plano
+          <Link href="/assinatura" className="whitespace-nowrap flex items-center gap-2 px-5 py-2.5 bg-[linear-gradient(135deg,#3b82f6,#8b5cf6)] hover:opacity-90 text-white rounded-md text-sm font-medium shadow-lg transition-all active:scale-95">
+            Fazer Upgrade
           </Link>
         )}
       </div>
 
-      <div className="card" style={{ padding: '16px', marginBottom: '24px', display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-        <Filter size={20} color="var(--text-secondary)" style={{ marginRight: '8px' }} />
-        <Link href={`/pedidos?filter=todos${viewParam}`} className={`btn ${filter === 'todos' ? '' : 'btn-outline'}`}>Todos</Link>
-        <Link href={`/pedidos?filter=pendentes${viewParam}`} className={`btn ${filter === 'pendentes' ? '' : 'btn-outline'}`}>Pendentes</Link>
-        <Link href={`/pedidos?filter=pronto${viewParam}`} className={`btn ${filter === 'pronto' ? '' : 'btn-outline'}`}>Pronto p/ Envio</Link>
-        <Link href={`/pedidos?filter=transito${viewParam}`} className={`btn ${filter === 'transito' ? '' : 'btn-outline'}`}>Em Trânsito</Link>
-        <Link href={`/pedidos?filter=atrasados${viewParam}`} className={`btn ${filter === 'atrasados' ? '' : 'btn-outline'}`}>Atrasados</Link>
-        <Link href={`/pedidos?filter=entregues${viewParam}`} className={`btn ${filter === 'entregues' ? '' : 'btn-outline'}`}>Entregues</Link>
+      <div className="p-4 mb-6 rounded-xl border border-border bg-surface/50 flex gap-2 flex-wrap items-center">
+        <Filter size={18} className="text-text-secondary mx-2" />
+        <Link href={`/pedidos?filter=todos${viewParam}`} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${filter === 'todos' ? 'bg-zinc-100 text-zinc-950' : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'}`}>Todos</Link>
+        <Link href={`/pedidos?filter=pendentes${viewParam}`} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${filter === 'pendentes' ? 'bg-zinc-100 text-zinc-950' : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'}`}>Pendentes</Link>
+        <Link href={`/pedidos?filter=pronto${viewParam}`} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${filter === 'pronto' ? 'bg-zinc-100 text-zinc-950' : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'}`}>Pronto p/ Envio</Link>
+        <Link href={`/pedidos?filter=transito${viewParam}`} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${filter === 'transito' ? 'bg-zinc-100 text-zinc-950' : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'}`}>Em Trânsito</Link>
+        <Link href={`/pedidos?filter=atrasados${viewParam}`} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${filter === 'atrasados' ? 'bg-zinc-100 text-zinc-950' : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'}`}>Atrasados</Link>
+        <Link href={`/pedidos?filter=entregues${viewParam}`} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${filter === 'entregues' ? 'bg-zinc-100 text-zinc-950' : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'}`}>Entregues</Link>
       </div>
 
-      <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
-        <div className="table-container" style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="flex-1 rounded-xl border border-border bg-surface/50 overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr style={{ borderBottom: '2px solid var(--border)', textAlign: 'left' }}>
-                <th style={{ paddingBottom: '16px' }}>Nº</th>
-                <th style={{ paddingBottom: '16px' }}>Cliente</th>
-                <th style={{ paddingBottom: '16px' }}>Data</th>
-                <th style={{ paddingBottom: '16px' }}>Tempo</th>
-                <th style={{ paddingBottom: '16px' }}>Pagamento</th>
-                <th style={{ paddingBottom: '16px' }}>Logística</th>
-                <th style={{ paddingBottom: '16px' }}>Ação</th>
+              <tr className="border-b border-border text-xs font-medium text-text-secondary uppercase tracking-widest bg-surface/80">
+                <th className="p-4 font-medium pl-6">Nº</th>
+                <th className="p-4 font-medium">Cliente</th>
+                <th className="p-4 font-medium">Data</th>
+                <th className="p-4 font-medium">Tempo</th>
+                <th className="p-4 font-medium">Pagamento</th>
+                <th className="p-4 font-medium">Logística</th>
+                <th className="p-4 font-medium pr-6">Ação</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="text-sm">
               {safeOrders.length === 0 ? (
                 <tr>
-                  <td colSpan="7" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+                  <td colSpan="7" className="text-center py-12 text-text-secondary">
                     Nenhum pedido encontrado para este filtro.
                   </td>
                 </tr>
@@ -141,31 +137,39 @@ export default async function PedidosPage({ searchParams }) {
                   const purchaseDate = new Date(order.purchase_date);
                   const daysSince = Math.floor((now - purchaseDate) / (1000 * 60 * 60 * 24));
                   
-                  let shippingBadge = 'info';
+                  let shippingBadge = 'bg-surface-hover text-text-secondary border border-border';
                   let shippingText = 'Pendente';
-                  if (order.shipping_status === 'shipped') { shippingBadge = 'info'; shippingText = 'Em Trânsito'; }
-                  else if (order.shipping_status === 'delivered') { shippingBadge = 'success'; shippingText = 'Entregue'; }
-                  else if (order.shipping_status === 'delayed_posting') { shippingBadge = 'warning'; shippingText = 'Atraso na Postagem'; }
-                  else if (order.shipping_status === 'delayed_delivery') { shippingBadge = 'danger'; shippingText = 'Atraso na Entrega'; }
+                  if (order.shipping_status === 'shipped') { shippingBadge = 'bg-surface-hover text-text-secondary border border-border'; shippingText = 'Em Trânsito'; }
+                  else if (order.shipping_status === 'delivered') { shippingBadge = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'; shippingText = 'Entregue'; }
+                  else if (order.shipping_status === 'delayed_posting') { shippingBadge = 'bg-amber-500/10 text-amber-500 border border-amber-500/20'; shippingText = 'Atraso na Postagem'; }
+                  else if (order.shipping_status === 'delayed_delivery') { shippingBadge = 'bg-red-500/10 text-red-400 border border-red-500/20'; shippingText = 'Atraso na Entrega'; }
 
-                  let payBadge = 'warning';
+                  let payBadge = 'bg-amber-500/10 text-amber-500 border border-amber-500/20';
                   let payText = 'Pendente';
-                  if (order.payment_status === 'paid') { payBadge = 'success'; payText = 'Pago'; }
-                  else if (order.payment_status === 'abandoned') { payBadge = 'danger'; payText = 'Abandonado'; }
+                  if (order.payment_status === 'paid') { payBadge = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'; payText = 'Pago'; }
+                  else if (order.payment_status === 'abandoned') { payBadge = 'bg-red-500/10 text-red-400 border border-red-500/20'; payText = 'Abandonado'; }
 
                   return (
-                    <tr key={order.id} style={{ borderBottom: '1px solid var(--border)', transition: 'background-color 0.2s' }}>
-                      <td style={{ padding: '16px 0', fontWeight: 'bold' }}>#{order.order_number}</td>
-                      <td style={{ padding: '16px 0' }}>{order.customer_name}</td>
-                      <td style={{ padding: '16px 0' }}>{purchaseDate.toLocaleDateString('pt-BR')}</td>
-                      <td style={{ padding: '16px 0', color: daysSince > 7 ? 'var(--warning)' : 'var(--text-secondary)' }}>
+                    <tr key={order.id} className="border-b border-border/50 hover:bg-surface-hover/20 transition-colors group">
+                      <td className="p-4 pl-6 font-medium text-text-secondary group-hover:text-text-primary">#{order.order_number}</td>
+                      <td className="p-4 text-text-secondary">{order.customer_name}</td>
+                      <td className="p-4 text-text-secondary">{purchaseDate.toLocaleDateString('pt-BR')}</td>
+                      <td className={`p-4 font-medium ${daysSince > 7 ? 'text-amber-500' : 'text-text-secondary'}`}>
                         {daysSince} dias
                       </td>
-                      <td style={{ padding: '16px 0' }}><span className={`badge ${payBadge}`}>{payText}</span></td>
-                      <td style={{ padding: '16px 0' }}><span className={`badge ${shippingBadge}`}>{shippingText}</span></td>
-                      <td style={{ padding: '16px 0' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                      <td className="p-4">
+                        <span className={`px-2.5 py-1 text-[11px] font-medium rounded-sm whitespace-nowrap ${payBadge}`}>
+                          {payText}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2.5 py-1 text-[11px] font-medium rounded-sm whitespace-nowrap ${shippingBadge}`}>
+                          {shippingText}
+                        </span>
+                      </td>
+                      <td className="p-4 pr-6">
+                        <div className="flex flex-col gap-2">
+                          <div className="flex gap-4 items-center">
                             {(() => {
                               let template = '';
                               if (order.payment_status === 'pending') {
@@ -175,7 +179,6 @@ export default async function PedidosPage({ searchParams }) {
                               } else if (order.shipping_status === 'shipped') {
                                 template = store.template_shipped || 'Olá [NomeCliente], boa notícia! Seu pedido [NumeroPedido] já foi enviado e está a caminho. Você pode acompanhar por este código: [CodigoRastreio].';
                               } else {
-                                // Default fallback for other states (e.g. Delivered)
                                 template = 'Olá [NomeCliente], aqui é da loja sobre o seu pedido [NumeroPedido].';
                               }
 
@@ -189,10 +192,10 @@ export default async function PedidosPage({ searchParams }) {
                                   href={`https://wa.me/?text=${encodeURIComponent(rawMsg)}`}
                                   target="_blank"
                                   rel="noreferrer"
-                                  style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', fontWeight: '500', padding: '6px 12px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px' }}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-medium text-xs rounded-md transition-colors"
                                   title="Enviar mensagem no WhatsApp"
                                 >
-                                  <MessageCircle size={16} /> Zap
+                                  <MessageCircle size={14} /> Zap
                                 </a>
                               );
                             })()}
@@ -202,35 +205,34 @@ export default async function PedidosPage({ searchParams }) {
                                 href={`https://${store.store_domain}.lojavirtualnuvem.com.br/admin/orders/${order.nuvemshop_order_id}`} 
                                 target="_blank" 
                                 rel="noreferrer"
-                                style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', fontWeight: '500' }}
+                                className="flex items-center gap-1.5 text-text-secondary hover:text-text-primary font-medium text-xs transition-colors"
                               >
-                                Ver Loja <ExternalLink size={14} />
+                                Ver Loja <ExternalLink size={12} />
                               </a>
                             ) : (
-                              <span style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9rem' }} title="Configure o domínio da loja na aba Configurações">
-                                Link indisponível
+                              <span className="text-zinc-600 flex items-center gap-1 text-xs" title="Configure o domínio da loja">
+                                Link Indisponível
                               </span>
                             )}
                           </div>
                           
                           {/* Código de Rastreio */}
                           {order.tracking_code ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: '600', backgroundColor: 'var(--surface-hover)', padding: '2px 8px', borderRadius: '4px' }}>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-[11px] font-mono text-text-secondary bg-surface-hover/50 px-2 py-0.5 rounded">
                                 {order.tracking_code}
                               </span>
                               <a 
                                 href={`https://parcelsapp.com/pt/tracking/${order.tracking_code}`} 
                                 target="_blank" 
                                 rel="noreferrer"
-                                style={{ color: 'var(--info)', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', fontWeight: '500', fontSize: '0.85rem' }}
-                                title="Rastrear Rota (Global)"
+                                className="flex items-center gap-1 text-blue-400 hover:text-blue-300 font-medium text-xs transition-colors"
                               >
-                                Rastrear <ExternalLink size={12} />
+                                Rastrear <ExternalLink size={10} />
                               </a>
                             </div>
                           ) : (
-                            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Sem rastreio</span>
+                            <span className="text-[11px] text-zinc-600 mt-1">Sem rastreio</span>
                           )}
                         </div>
                       </td>

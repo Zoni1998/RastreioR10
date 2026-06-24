@@ -32,7 +32,7 @@ export async function POST(request) {
       .single();
 
     if (storeError || !store) {
-      console.error(`Webhook recebido para loja ${nuvemshopStoreId}, mas ela não foi encontrada no TrackFlow.`);
+      console.error(`Webhook recebido para loja ${nuvemshopStoreId}, mas ela não foi encontrada no AuraTrack.`);
       // Retornamos 200 para a Nuvemshop não ficar tentando reenviar o webhook
       return NextResponse.json({ message: 'Loja não encontrada' }, { status: 200 });
     }
@@ -52,7 +52,7 @@ export async function POST(request) {
     const response = await fetch(`https://api.tiendanube.com/v1/${nuvemshopStoreId}/orders/${nuvemshopOrderId}`, {
       headers: {
         'Authorization': `Bearer ${store.access_token}`,
-        'User-Agent': 'TrackFlow App (suporte@trackflow.com)'
+        'User-Agent': 'AuraTrack App (suporte@trackflow.com)'
       }
     });
 

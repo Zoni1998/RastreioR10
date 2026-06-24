@@ -1,5 +1,5 @@
 import { createClient } from '../../utils/supabase/server';
-import { Settings, Save, Store, Info } from 'lucide-react';
+import { Settings, Save, Store, Info, ShieldCheck, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { updateStoreConfig } from './actions';
 
@@ -9,14 +9,14 @@ export default async function ConfiguracoesPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-    // Pegar a loja do usuário e contagem de pedidos
+  // Pegar a loja do usuário
   const { data: store } = await supabase.from('stores').select('id, nuvemshop_store_id, posting_delay_days, delivery_delay_days, store_domain, created_at, whatsapp_message, email_alerts, current_plan, template_delayed, template_shipped, template_pending').eq('user_id', user.id).single();
 
   if (!store) {
     return (
-      <div className="page-header">
-        <h1 className="page-title">Configurações</h1>
-        <p style={{color: 'var(--text-secondary)'}}>Nenhuma loja vinculada. Vá ao Dashboard e conecte-se à Nuvemshop.</p>
+      <div className="p-8 text-text-secondary">
+        <h1 className="text-2xl font-medium text-text-primary mb-2">Configurações</h1>
+        <p>Nenhuma loja vinculada. Vá ao Dashboard e conecte-se à Nuvemshop.</p>
       </div>
     );
   }
@@ -30,31 +30,39 @@ export default async function ConfiguracoesPage() {
   const templatePending = store.template_pending || 'Olá [NomeCliente], tudo bem? Notei que você iniciou um pedido ([NumeroPedido]) mas o pagamento ainda está pendente. Ficou com alguma dúvida ou teve algum problema na hora de pagar?';
 
   return (
-    <div>
-      <div className="page-header">
-        <h1 className="page-title">
-          <Settings size={28} color="var(--primary)" style={{ marginRight: '12px', verticalAlign: 'middle' }} />
+    <div className="flex flex-col pb-16">
+      <div className="mb-10">
+        <h1 className="text-3xl font-medium text-text-primary tracking-tight flex items-center gap-3">
+          <Settings size={28} className="text-text-secondary" strokeWidth={2} />
           Configurações
         </h1>
+        <p className="text-text-secondary mt-2 text-sm max-w-2xl">
+          Personalize as regras de negócio, limites de atraso e mensagens enviadas aos seus clientes.
+        </p>
       </div>
 
-      <div className="grid-cards" style={{ gridTemplateColumns: '1fr', maxWidth: '800px' }}>
+      <div className="grid grid-cols-1 gap-8 max-w-[800px]">
         
         {/* Card de Assinatura */}
-        <div className="card" style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, var(--surface) 100%)', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
-          <h2 style={{ fontSize: '1.25rem', marginTop: 0, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Store size={20} color="var(--primary)" /> Meu Plano
+        <div className="p-8 rounded-xl border border-indigo-500/20 bg-gradient-to-br from-indigo-500/5 to-transparent relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-10 -mr-8 -mt-8 bg-indigo-500/5 blur-3xl rounded-full" />
+          
+          <h2 className="text-xl font-medium text-text-primary mb-6 flex items-center gap-2 relative z-10">
+            <ShieldCheck size={20} className="text-indigo-400" /> Meu Plano
           </h2>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 relative z-10">
             <div>
-              <p style={{ margin: '0 0 4px 0', color: 'var(--text-secondary)' }}>Plano Atual</p>
-              <h3 style={{ margin: 0, fontSize: '1.5rem', color: 'var(--text-primary)', textTransform: 'capitalize' }}>{planName}</h3>
+              <p className="text-xs font-medium text-text-secondary uppercase tracking-widest mb-1">Plano Atual</p>
+              <h3 className="text-2xl font-medium text-indigo-400 capitalize">{planName}</h3>
             </div>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <span className="badge success">Ativo</span>
+            <div className="flex items-center gap-4">
+              <span className="px-3 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-bold uppercase tracking-wider rounded-sm">
+                Ativo
+              </span>
               {store.current_plan !== 'max' && (
-                <Link href="/assinatura" className="btn" style={{ textDecoration: 'none', padding: '8px 16px', fontSize: '0.9rem' }}>
+                <Link href="/assinatura" className="px-5 py-2.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-sm rounded-md transition-colors shadow-sm">
                   Fazer Upgrade
                 </Link>
               )}
@@ -63,32 +71,40 @@ export default async function ConfiguracoesPage() {
         </div>
 
         {/* Card de Integração */}
-        <div className="card">
-          <h2 style={{ fontSize: '1.25rem', marginTop: 0, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Store size={20} color="var(--text-secondary)" /> Integração Nuvemshop
+        <div className="p-8 rounded-xl border border-border bg-surface/50">
+          <h2 className="text-xl font-medium text-text-primary mb-6 flex items-center gap-2">
+            <Store size={20} className="text-text-secondary" /> Integração Nuvemshop
           </h2>
-          <div style={{ padding: '16px', backgroundColor: 'var(--background)', borderRadius: '8px', border: '1px solid var(--border)' }}>
-            <p style={{ margin: '0 0 8px 0', color: 'var(--text-secondary)' }}>ID da Loja (User ID):</p>
-            <p style={{ margin: 0, fontSize: '1.2rem', fontWeight: 'bold' }}>{store.nuvemshop_store_id}</p>
+          <div className="p-6 bg-background border border-border/80 rounded-lg flex flex-col sm:flex-row gap-8">
+            <div>
+              <p className="text-xs font-medium text-text-secondary uppercase tracking-widest mb-1">ID da Loja</p>
+              <p className="text-xl font-medium text-text-primary font-mono tracking-tight">{store.nuvemshop_store_id}</p>
+            </div>
             
-            <p style={{ margin: '16px 0 8px 0', color: 'var(--text-secondary)' }}>Data da Conexão:</p>
-            <p style={{ margin: 0 }}>{new Date(store.created_at).toLocaleDateString('pt-BR')} às {new Date(store.created_at).toLocaleTimeString('pt-BR')}</p>
+            <div>
+              <p className="text-xs font-medium text-text-secondary uppercase tracking-widest mb-1">Data da Conexão</p>
+              <p className="text-text-secondary font-medium">
+                {new Date(store.created_at).toLocaleDateString('pt-BR')} <span className="text-text-secondary ml-1">às {new Date(store.created_at).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</span>
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Card de Regras de Negócio */}
-        <div className="card">
-          <h2 style={{ fontSize: '1.25rem', marginTop: 0, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Info size={20} color="var(--text-secondary)" /> Preferências e Atrasos
+        <div className="p-8 rounded-xl border border-border bg-surface/50">
+          <h2 className="text-xl font-medium text-text-primary mb-8 flex items-center gap-2">
+            <Info size={20} className="text-text-secondary" /> Preferências e Operação
           </h2>
           
-          <form action={updateStoreConfig} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <form action={updateStoreConfig} className="flex flex-col gap-8">
             <input type="hidden" name="storeId" value={store.id} />
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label htmlFor="store_domain" style={{ fontWeight: '500', fontSize: '1rem' }}>Domínio da Nuvemshop (Nome da sua loja)</label>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 8px 0' }}>
-                Apenas o nome que vem antes de .lojavirtualnuvem.com.br (Exemplo: <b>vzsports2</b>)
+            <div className="flex flex-col gap-2">
+              <label htmlFor="store_domain" className="text-sm font-medium text-text-primary">
+                Domínio da Nuvemshop (Nome da loja)
+              </label>
+              <p className="text-xs text-text-secondary mb-1">
+                Apenas o prefixo antes de .lojavirtualnuvem.com.br (Ex: <b className="text-text-secondary">vzsports2</b>)
               </p>
               <input 
                 id="store_domain" 
@@ -96,118 +112,128 @@ export default async function ConfiguracoesPage() {
                 type="text" 
                 defaultValue={store.store_domain || ''}
                 placeholder="vzsports2"
-                style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--background)', color: 'var(--text-primary)', fontSize: '1rem' }}
+                className="w-full bg-background border border-border rounded-md px-4 py-3 text-sm text-text-primary placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-500 transition-all font-mono"
               />
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', backgroundColor: 'var(--background)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label style={{ fontWeight: '500', fontSize: '1.1rem', color: '#10b981' }}>Templates do WhatsApp</label>
+            <div className="flex flex-col gap-6 p-6 bg-background border border-border/80 rounded-lg">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h3 className="text-base font-medium text-text-primary flex items-center gap-2">
+                    <Mail size={16} className="text-text-secondary" /> Templates do WhatsApp
+                  </h3>
+                  <p className="text-xs text-text-secondary mt-1">
+                    Variáveis: <b className="text-text-secondary">[NomeCliente]</b>, <b className="text-text-secondary">[NumeroPedido]</b>, <b className="text-text-secondary">[CodigoRastreio]</b>.
+                  </p>
+                </div>
                 {store.current_plan === 'start' && (
-                  <span className="badge warning" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    🔒 Exclusivo PRO & MAX
+                  <span className="px-2.5 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[10px] font-bold uppercase tracking-wider rounded-sm flex items-center gap-1 shrink-0">
+                    <Lock size={10} /> PRO/MAX
                   </span>
                 )}
               </div>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 -8px 0' }}>
-                Variáveis disponíveis: <b>[NomeCliente]</b>, <b>[NumeroPedido]</b>, <b>[CodigoRastreio]</b>.
-              </p>
               
               {store.current_plan === 'start' ? (
-                <div style={{ padding: '24px', backgroundColor: 'var(--surface)', borderRadius: '8px', border: '1px dashed var(--border)', textAlign: 'center' }}>
-                  <p style={{ margin: '0 0 16px 0', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-                    A criação de mensagens automáticas para recuperação e envios está disponível apenas nos planos pagos.
+                <div className="p-8 bg-surface border border-dashed border-border rounded-lg text-center flex flex-col items-center justify-center">
+                  <p className="text-text-secondary text-sm mb-4 max-w-sm">
+                    A edição de mensagens automáticas está disponível apenas nos planos superiores.
                   </p>
-                  <Link href="/assinatura" className="btn" style={{ textDecoration: 'none', display: 'inline-block' }}>
+                  <Link href="/assinatura" className="px-4 py-2 bg-surface-hover hover:bg-zinc-700 text-text-primary text-sm font-medium rounded-md transition-colors border border-border">
                     Desbloquear Templates
                   </Link>
                 </div>
               ) : (
-                <>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label htmlFor="template_pending" style={{ fontSize: '0.95rem', color: 'var(--warning)' }}>Template: Carrinho / Aguardando Pagamento</label>
+                <div className="flex flex-col gap-6">
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="template_pending" className="text-xs font-medium text-amber-500 uppercase tracking-widest">
+                      Carrinho / Aguardando Pagamento
+                    </label>
                     <textarea 
                       id="template_pending" 
                       name="template_pending" 
                       defaultValue={templatePending}
                       rows={2}
-                      style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--surface)', color: 'var(--text-primary)', fontSize: '0.9rem', fontFamily: 'inherit', resize: 'vertical' }}
+                      className="w-full bg-surface border border-border rounded-md px-4 py-3 text-sm text-text-secondary placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-500 transition-all resize-y"
                     />
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label htmlFor="template_shipped" style={{ fontSize: '0.95rem', color: 'var(--info)' }}>Template: Pedido Enviado</label>
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="template_shipped" className="text-xs font-medium text-blue-400 uppercase tracking-widest">
+                      Pedido Enviado
+                    </label>
                     <textarea 
                       id="template_shipped" 
                       name="template_shipped" 
                       defaultValue={templateShipped}
                       rows={2}
-                      style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--surface)', color: 'var(--text-primary)', fontSize: '0.9rem', fontFamily: 'inherit', resize: 'vertical' }}
+                      className="w-full bg-surface border border-border rounded-md px-4 py-3 text-sm text-text-secondary placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-500 transition-all resize-y"
                     />
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label htmlFor="template_delayed" style={{ fontSize: '0.95rem', color: 'var(--danger)' }}>Template: Pedido Atrasado</label>
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="template_delayed" className="text-xs font-medium text-red-400 uppercase tracking-widest">
+                      Pedido Atrasado
+                    </label>
                     <textarea 
                       id="template_delayed" 
                       name="template_delayed" 
                       defaultValue={templateDelayed}
                       rows={2}
-                      style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--surface)', color: 'var(--text-primary)', fontSize: '0.9rem', fontFamily: 'inherit', resize: 'vertical' }}
+                      className="w-full bg-surface border border-border rounded-md px-4 py-3 text-sm text-text-secondary placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-500 transition-all resize-y"
                     />
                   </div>
-                </>
+                </div>
               )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <input 
-                type="checkbox" 
-                id="email_alerts" 
-                name="email_alerts" 
-                defaultChecked={store.email_alerts}
-                style={{ width: '20px', height: '20px', accentColor: 'var(--primary)' }}
-              />
-              <label htmlFor="email_alerts" style={{ fontWeight: '500', fontSize: '1rem', cursor: 'pointer' }}>
-                Receber Alertas por E-mail (Em breve)
-              </label>
-            </div>
+            <label className="flex items-center gap-3 cursor-pointer group w-fit">
+              <div className="relative flex items-center justify-center">
+                <input 
+                  type="checkbox" 
+                  id="email_alerts" 
+                  name="email_alerts" 
+                  defaultChecked={store.email_alerts}
+                  className="peer sr-only"
+                />
+                <div className="w-10 h-5 bg-surface-hover rounded-full peer-checked:bg-emerald-500 transition-colors" />
+                <div className="absolute left-1 w-3 h-3 bg-zinc-400 rounded-full transition-transform peer-checked:translate-x-5 peer-checked:bg-white" />
+              </div>
+              <span className="text-sm font-medium text-text-secondary group-hover:text-text-primary transition-colors">
+                Receber Alertas por E-mail <span className="text-zinc-600 ml-1">(Em breve)</span>
+              </span>
+            </label>
 
-            <div style={{ display: 'flex', gap: '16px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-                <label htmlFor="postingDays" style={{ fontWeight: '500', fontSize: '1rem' }}>Dias de Atraso para Postagem</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 border-t border-border/50">
+              <div className="flex flex-col gap-2">
+                <label htmlFor="postingDays" className="text-sm font-medium text-text-primary">
+                  Atraso para Postagem (dias)
+                </label>
                 <input 
                   type="number" 
                   id="postingDays" 
                   name="postingDays" 
                   defaultValue={postingDays} 
                   min="1" max="60"
-                  style={{
-                    padding: '12px', borderRadius: '8px', border: '1px solid var(--border)',
-                    backgroundColor: 'var(--background)', color: 'var(--text-primary)',
-                    fontSize: '1rem'
-                  }}
+                  className="w-full bg-background border border-border rounded-md px-4 py-3 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-zinc-500 transition-all font-mono"
                 />
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-                <label htmlFor="deliveryDays" style={{ fontWeight: '500', fontSize: '1rem' }}>Dias de Atraso para Entrega</label>
+              <div className="flex flex-col gap-2">
+                <label htmlFor="deliveryDays" className="text-sm font-medium text-text-primary">
+                  Atraso para Entrega (dias)
+                </label>
                 <input 
                   type="number" 
                   id="deliveryDays" 
                   name="deliveryDays" 
                   defaultValue={deliveryDays} 
                   min="1" max="90"
-                  style={{
-                    padding: '12px', borderRadius: '8px', border: '1px solid var(--border)',
-                    backgroundColor: 'var(--background)', color: 'var(--text-primary)',
-                    fontSize: '1rem'
-                  }}
+                  className="w-full bg-background border border-border rounded-md px-4 py-3 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-zinc-500 transition-all font-mono"
                 />
               </div>
             </div>
 
-            <button type="submit" className="btn" style={{ alignSelf: 'flex-start', padding: '12px 24px', fontSize: '1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button type="submit" className="mt-4 flex items-center justify-center gap-2 px-6 py-3 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-sm rounded-md transition-all active:scale-95 shadow-sm w-fit">
               <Save size={18} />
               Salvar Configurações
             </button>

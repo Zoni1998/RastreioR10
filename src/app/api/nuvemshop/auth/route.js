@@ -57,7 +57,7 @@ export async function GET(request) {
       const storeInfoRes = await fetch(`https://api.nuvemshop.com.br/v1/${nuvemshopUserId}/store`, {
         headers: {
           'Authentication': `bearer ${access_token}`,
-          'User-Agent': 'TrackFlow App (suporte@trackflow.com)'
+          'User-Agent': 'AuraTrack App (suporte@trackflow.com)'
         }
       });
       const storeInfo = await storeInfoRes.json();
@@ -110,7 +110,7 @@ export async function GET(request) {
             headers: {
               'Content-Type': 'application/json',
               'Authentication': `bearer ${access_token}`,
-              'User-Agent': 'TrackFlow App (suporte@trackflow.com)'
+              'User-Agent': 'AuraTrack App (suporte@trackflow.com)'
             },
             body: JSON.stringify(webhookBody)
           });

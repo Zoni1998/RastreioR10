@@ -1,103 +1,85 @@
-'use client'
+'use client';
 
-import { useActionState } from 'react'
-import { login } from '../auth/actions'
-import Link from 'next/link'
-import { Package, ArrowRight, ShieldCheck, Zap, Truck, Box } from 'lucide-react'
+import { useActionState } from 'react';
+import { login } from '../auth/actions';
+import Link from 'next/link';
+import { Package, ArrowRight, ShieldCheck, Activity } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
 
 export default function LoginPage() {
-  const [state, formAction, isPending] = useActionState(login, null)
+  const [state, formAction, isPending] = useActionState(login, null);
+  const reduce = useReducedMotion();
 
   return (
-    <div style={{ display: 'flex', width: '100%', minHeight: '100vh', backgroundColor: 'var(--background)' }}>
-      
-      {/* Lado Esquerdo - Formulário */}
-      <div style={{ 
-        flex: '1', 
-        display: 'flex', 
-        flexDirection: 'column', 
-        justifyContent: 'center', 
-        alignItems: 'center',
-        padding: '40px 24px',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        {/* Efeitos de fundo discretos */}
-        <div style={{ position: 'absolute', top: '0', left: '-10%', width: '500px', height: '500px', background: 'var(--primary)', borderRadius: '50%', filter: 'blur(100px)', opacity: '0.15' }}></div>
-        <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '400px', height: '400px', background: 'var(--primary)', borderRadius: '50%', filter: 'blur(90px)', opacity: '0.12' }}></div>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(var(--primary) 1px, transparent 1px)', backgroundSize: '40px 40px', opacity: 0.15 }}></div>
+    <div className="flex min-h-[100dvh] w-full bg-background text-text-primary font-sans selection:bg-surface-hover selection:text-white">
+      {/* Esquerda: Formulário (50%) */}
+      <div className="flex-1 flex flex-col items-center justify-center p-8 relative z-10">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
+        <div className="w-full max-w-md mx-auto p-10 rounded-[2rem] liquid-glass border border-border/40 shadow-2xl z-10">
+          {/* Logo */}
+          <motion.div 
+            initial={reduce ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="flex items-center gap-3 mb-16"
+          >
+            <img src="/logo.png" alt="AuraTrack" className="w-8 h-8 rounded-sm object-contain" />
+            <span className="font-semibold tracking-tight text-lg">AuraTrack</span>
+          </motion.div>
 
-        {/* Ícones flutuantes decorativos */}
-        <div className="floating-icon" style={{ position: 'absolute', top: '15%', left: '10%', opacity: 0.15, transform: 'rotate(-15deg)' }}>
-          <Package size={64} color="var(--primary)" />
-        </div>
-        <div className="floating-icon" style={{ position: 'absolute', bottom: '20%', left: '8%', opacity: 0.12, transform: 'rotate(15deg)' }}>
-          <Truck size={48} color="var(--primary)" />
-        </div>
-        <div className="floating-icon" style={{ position: 'absolute', top: '25%', right: '12%', opacity: 0.15, transform: 'rotate(25deg)' }}>
-          <Box size={56} color="var(--primary)" />
-        </div>
-        <div className="floating-icon" style={{ position: 'absolute', bottom: '15%', right: '15%', opacity: 0.1, transform: 'rotate(-20deg)' }}>
-          <ShieldCheck size={80} color="var(--primary)" />
-        </div>
-
-        <div style={{ width: '100%', maxWidth: '400px', zIndex: 1 }}>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
-            <div className="glow-logo" style={{ padding: '10px', background: 'var(--primary)', borderRadius: '12px', boxShadow: 'var(--shadow-primary)' }}>
-              <Package size={28} color="#fff" />
-            </div>
-            <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>TrackFlow</span>
-          </div>
-
-          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-            <h1 style={{ fontSize: '2rem', marginBottom: '8px', color: 'var(--text-primary)', fontWeight: '700' }}>Bem-vindo de volta</h1>
-            <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '1rem' }}>
-              Acesse o seu painel e pare de perder dinheiro com atrasos.
+          {/* Header */}
+          <motion.div 
+            initial={reduce ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+            className="mb-10"
+          >
+            <h1 className="text-3xl md:text-4xl font-medium tracking-tight mb-3">
+              Acesse sua conta
+            </h1>
+            <p className="text-text-secondary text-sm leading-relaxed max-w-[40ch]">
+              Gerencie a logística e controle as retenções da sua operação em tempo real.
             </p>
-          </div>
+          </motion.div>
 
-          <form action={formAction} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            
+          {/* Form */}
+          <motion.form 
+            action={formAction} 
+            className="flex flex-col gap-5"
+            initial={reduce ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
+          >
             {state?.error && (
-              <div style={{ 
-                padding: '16px', 
-                backgroundColor: 'rgba(239, 68, 68, 0.1)', 
-                border: '1px solid rgba(239, 68, 68, 0.2)', 
-                borderRadius: '8px', 
-                color: 'var(--danger)',
-                fontSize: '0.9rem',
-                fontWeight: '500'
-              }}>
+              <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-md text-sm font-medium">
                 {state.error}
               </div>
             )}
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label htmlFor="email" style={{ fontSize: '0.9rem', fontWeight: '500', color: 'var(--text-primary)' }}>E-mail profissional</label>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="email" className="text-xs font-medium text-text-secondary uppercase tracking-widest">
+                E-mail profissional
+              </label>
               <input 
                 id="email" 
                 name="email" 
                 type="email" 
                 required 
-                placeholder="voce@sualoja.com.br"
-                style={{ 
-                  padding: '14px 16px', 
-                  borderRadius: '12px', 
-                  border: '1px solid var(--border)', 
-                  backgroundColor: 'var(--surface)', 
-                  color: 'var(--text-primary)',
-                  outline: 'none',
-                  fontSize: '1rem',
-                  transition: 'border-color 0.2s'
-                }}
+                placeholder="nome@empresa.com.br"
+                className="w-full bg-surface border border-border rounded-md px-4 py-3 text-sm text-text-primary placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500 transition-all"
               />
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label htmlFor="password" style={{ fontSize: '0.9rem', fontWeight: '500', color: 'var(--text-primary)' }}>Senha</label>
-                <Link href="/esqueci-senha" style={{ fontSize: '0.85rem', color: 'var(--primary)', textDecoration: 'none', fontWeight: '600' }}>
-                  Esqueci minha senha
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-center">
+                <label htmlFor="password" className="text-xs font-medium text-text-secondary uppercase tracking-widest">
+                  Senha
+                </label>
+                <Link 
+                  href="/esqueci-senha" 
+                  className="text-xs font-medium text-text-secondary hover:text-text-secondary transition-colors"
+                >
+                  Esqueceu a senha?
                 </Link>
               </div>
               <input 
@@ -106,143 +88,84 @@ export default function LoginPage() {
                 type="password" 
                 required 
                 placeholder="••••••••"
-                style={{ 
-                  padding: '14px 16px', 
-                  borderRadius: '12px', 
-                  border: '1px solid var(--border)', 
-                  backgroundColor: 'var(--surface)', 
-                  color: 'var(--text-primary)',
-                  outline: 'none',
-                  fontSize: '1rem',
-                  transition: 'border-color 0.2s'
-                }}
+                className="w-full bg-surface border border-border rounded-md px-4 py-3 text-sm text-text-primary placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500 transition-all"
               />
             </div>
 
             <button 
               type="submit" 
-              className="glow-button"
               disabled={isPending}
-              style={{
-                marginTop: '8px',
-                padding: '14px',
-                backgroundColor: 'var(--primary)',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '1rem',
-                fontWeight: '600',
-                cursor: isPending ? 'not-allowed' : 'pointer',
-                opacity: isPending ? 0.7 : 1,
-                boxShadow: 'var(--shadow-primary)',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: '8px',
-                transition: 'all 0.2s'
-              }}
+              className="mt-4 w-full bg-text-primary hover:bg-text-primary/90 text-background font-medium py-3 px-4 rounded-md text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
             >
-              {isPending ? 'Entrando...' : (
-                <>Entrar no Painel <ArrowRight size={18} /></>
+              {isPending ? (
+                <span className="animate-pulse">Autenticando...</span>
+              ) : (
+                <span className="flex items-center justify-center gap-2">Entrar <ArrowRight size={16} strokeWidth={2} /></span>
               )}
             </button>
-          </form>
+          </motion.form>
 
-          <p style={{ marginTop: '32px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-            Ainda não tem uma conta? <Link href="/cadastro" style={{ color: 'var(--primary)', fontWeight: '600', textDecoration: 'none' }}>Crie agora</Link>
-          </p>
         </div>
+
+        <motion.div 
+          initial={reduce ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+          className="mt-8 z-10 text-center"
+        >
+          <p className="text-sm text-text-secondary">
+            Não possui uma conta?{' '}
+            <Link href="/cadastro" className="text-primary hover:brightness-125 transition-colors font-medium">
+              Criar operação
+            </Link>
+          </p>
+        </motion.div>
       </div>
 
-      {/* Lado Direito - Hero visual */}
-      <div style={{ 
-        flex: '1.2', 
-        display: 'none', 
-        flexDirection: 'column',
-        justifyContent: 'center',
-        padding: '60px',
-        '@media (min-width: 900px)': { display: 'flex' },
-        background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-        borderLeft: '1px solid rgba(255,255,255,0.05)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        {/* Decorative background blur */}
-        <div style={{ position: 'absolute', top: '10%', right: '-10%', width: '400px', height: '400px', background: 'var(--primary)', borderRadius: '50%', filter: 'blur(150px)', opacity: '0.15' }}></div>
-        <div style={{ position: 'absolute', bottom: '-10%', left: '10%', width: '300px', height: '300px', background: 'var(--info)', borderRadius: '50%', filter: 'blur(120px)', opacity: '0.1' }}></div>
+      {/* Direita: Painel Visual Minimalista (Cold Luxury / Dark Tech) */}
+      <div className="hidden lg:flex flex-1 bg-surface relative border-l border-border items-center justify-center overflow-hidden">
+        {/* Background Grids / Lines */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         
-        <div style={{ zIndex: 1, maxWidth: '500px', margin: '0 auto' }}>
-          <div className="glass-panel" style={{ padding: '32px', borderRadius: '24px', boxShadow: 'var(--shadow-lg)' }}>
-            <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(99, 102, 241, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ShieldCheck size={24} color="var(--primary)" />
+        <div className="relative z-10 max-w-lg p-12">
+          <div className="space-y-8">
+            <div className="flex gap-4">
+              <div className="h-10 w-10 shrink-0 border border-border bg-surface-hover/50 flex items-center justify-center rounded-sm">
+                <ShieldCheck size={20} className="text-text-secondary" />
               </div>
               <div>
-                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', color: '#fff' }}>Gestão de Risco Ativa</h3>
-                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.5' }}>Evite chargebacks e estornos antes mesmo do seu cliente reclamar no ReclameAqui.</p>
+                <h3 className="text-text-primary font-medium text-lg mb-1">Risco Monitorado</h3>
+                <p className="text-text-secondary text-sm leading-relaxed max-w-[35ch]">
+                  Nosso motor intercepta padrões de chargeback antes que eles alcancem os gateways de pagamento.
+                </p>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '16px' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Zap size={24} color="var(--success)" />
+            <div className="flex gap-4">
+              <div className="h-10 w-10 shrink-0 border border-border bg-surface-hover/50 flex items-center justify-center rounded-sm">
+                <Activity size={20} className="text-text-secondary" />
               </div>
               <div>
-                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', color: '#fff' }}>100% Automático</h3>
-                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.5' }}>Integração invisível com a Nuvemshop usando Webhooks em tempo real.</p>
+                <h3 className="text-text-primary font-medium text-lg mb-1">Dados Sincronizados</h3>
+                <p className="text-text-secondary text-sm leading-relaxed max-w-[35ch]">
+                  Integração nativa com plataformas de E-commerce. Atrasos são alertados com precisão cirúrgica.
+                </p>
               </div>
             </div>
           </div>
-
-          <div style={{ marginTop: '40px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ display: 'flex' }}>
-              {/* Avatares mockados */}
-              {[1,2,3,4].map((i) => (
-                <div key={i} style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid #0f172a', background: '#334155', marginLeft: i === 1 ? '0' : '-12px' }}></div>
+          
+          <div className="mt-16 pt-8 border-t border-border flex items-center gap-4">
+            <div className="flex -space-x-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="w-10 h-10 rounded-full border-2 border-zinc-900 bg-surface-hover"></div>
               ))}
             </div>
-            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-              Junte-se a <strong style={{ color: '#fff' }}>+500 lojistas</strong> faturando mais.
+            <p className="text-xs text-text-secondary font-medium tracking-wide uppercase">
+              Operações ativas globais
             </p>
           </div>
         </div>
       </div>
-
-      {/* Basic responsive style injection for the hidden panel on mobile */}
-      <style dangerouslySetInnerHTML={{__html: `
-        @media (max-width: 900px) {
-          div[style*="flex: 1.2"] { display: none !important; }
-        }
-        
-        .glow-button {
-          transition: all 0.3s ease !important;
-        }
-        .glow-button:hover:not(:disabled) {
-          box-shadow: 0 0 25px var(--primary) !important;
-          transform: translateY(-2px);
-        }
-
-        .glow-logo {
-          transition: all 0.3s ease !important;
-          cursor: pointer;
-        }
-        .glow-logo:hover {
-          box-shadow: 0 0 30px var(--primary) !important;
-          transform: scale(1.1) rotate(-5deg);
-        }
-
-        @keyframes float {
-          0% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-15px) rotate(5deg); }
-          100% { transform: translateY(0px) rotate(0deg); }
-        }
-        .floating-icon {
-          animation: float 6s ease-in-out infinite;
-        }
-        .floating-icon:nth-child(2) { animation-duration: 8s; animation-delay: 1s; }
-        .floating-icon:nth-child(3) { animation-duration: 7s; animation-delay: 2s; }
-        .floating-icon:nth-child(4) { animation-duration: 9s; animation-delay: 0.5s; }
-      `}} />
     </div>
-  )
+  );
 }

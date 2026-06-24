@@ -12,7 +12,7 @@ export default async function RecuperacaoPage({ searchParams }) {
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return <div>Redirecionando...</div>;
+  if (!user) return <div className="p-8 text-text-secondary">Redirecionando...</div>;
 
   let activeClient = supabase;
   if (viewAsStore && user.email === process.env.ADMIN_EMAIL) {
@@ -31,7 +31,7 @@ export default async function RecuperacaoPage({ searchParams }) {
 
   const { data: store } = await storeQuery.single();
 
-  if (!store) return <div style={{padding: '32px'}}>Nenhuma loja conectada.</div>;
+  if (!store) return <div className="p-8 text-text-secondary">Nenhuma loja conectada.</div>;
 
   const currentPlan = store.current_plan || 'start';
   const isMaxPlan = currentPlan === 'max';
@@ -50,80 +50,78 @@ export default async function RecuperacaoPage({ searchParams }) {
   const recoverableAmount = safeOrders.reduce((acc, order) => acc + Number(order.total_amount || 0), 0);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
-      <div className="page-header" style={{ marginBottom: '24px' }}>
-        <h1 className="page-title">
-          <ShoppingCart size={28} color="var(--primary)" style={{ marginRight: '12px', verticalAlign: 'middle' }} />
+    <div className="flex flex-col h-full pb-12 relative">
+      <div className="mb-8">
+        <h1 className="text-3xl font-medium text-text-primary tracking-tight flex items-center gap-3">
+          <ShoppingCart size={28} className="text-emerald-500" strokeWidth={2} />
           Recuperação de Vendas
         </h1>
-        <p style={{ color: 'var(--text-secondary)', marginTop: '8px' }}>
-          Recupere boletos não pagos e carrinhos abandonados diretamente pelo WhatsApp.
+        <p className="text-text-secondary mt-2 text-sm max-w-2xl">
+          Recupere boletos não pagos e carrinhos abandonados com um clique diretamente pelo WhatsApp.
         </p>
       </div>
 
-      <div className="grid-cards" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', marginBottom: '24px' }}>
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, var(--surface) 100%)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'rgba(16, 185, 129, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
-            <TrendingUp size={24} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="p-8 rounded-[2rem] border border-emerald-500/30 bg-emerald-500/5 liquid-glass flex items-center gap-6 shadow-xl">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20 shadow-[inset_0_0_15px_rgba(16,185,129,0.15)]">
+            <TrendingUp size={28} strokeWidth={1.5} />
           </div>
           <div>
-            <p style={{ margin: '0 0 4px 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Valor Potencial a Recuperar</p>
-            <h2 style={{ margin: 0, fontSize: '1.8rem', color: '#10b981' }}>
+            <p className="text-xs font-medium text-emerald-500/70 uppercase tracking-widest mb-1">Valor Potencial (Risco)</p>
+            <h2 className="text-3xl font-medium text-emerald-400 tracking-tight">
               R$ {recoverableAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h2>
           </div>
         </div>
 
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'var(--surface-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
-            <ShoppingCart size={24} />
+        <div className="p-8 rounded-[2rem] border border-border/40 liquid-glass flex items-center gap-6 shadow-xl">
+          <div className="w-16 h-16 rounded-2xl bg-surface-hover/50 border border-border/50 flex items-center justify-center text-text-secondary shadow-sm">
+            <ShoppingCart size={28} strokeWidth={1.5} />
           </div>
           <div>
-            <p style={{ margin: '0 0 4px 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Carrinhos / Boletos Pendentes</p>
-            <h2 style={{ margin: 0, fontSize: '1.8rem', color: 'var(--text-primary)' }}>
+            <p className="text-xs font-medium text-text-secondary uppercase tracking-widest mb-1">Boletos / Abandonados</p>
+            <h2 className="text-3xl font-medium text-text-primary tracking-tight">
               {safeOrders.length}
             </h2>
           </div>
         </div>
       </div>
 
-      <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0, position: 'relative' }}>
+      <div className="flex-1 rounded-[2rem] border border-border/40 liquid-glass overflow-hidden flex flex-col relative min-h-[450px] shadow-xl">
         
         {!isMaxPlan && (
-          <div style={{
-            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-            backdropFilter: 'blur(4px)', backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px', textAlign: 'center'
-          }}>
-            <Lock size={48} color="var(--warning)" style={{ marginBottom: '16px' }} />
-            <h2 style={{ color: 'white', marginBottom: '8px' }}>Funcionalidade Exclusiva MAX</h2>
-            <p style={{ color: '#cbd5e1', maxWidth: '500px', marginBottom: '24px', lineHeight: 1.5 }}>
-              Você tem <b>R$ {recoverableAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b> parados em pedidos não pagos. 
-              Assine o plano MAX e libere a ferramenta de recuperação automática via WhatsApp. <b>Recupere 1 pedido e a ferramenta já se paga!</b>
+          <div className="absolute inset-0 bg-background/70 backdrop-blur-[6px] z-10 flex flex-col items-center justify-center p-8 text-center border-t border-border/50">
+            <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-6 shadow-lg">
+              <Lock size={28} className="text-amber-500" />
+            </div>
+            <h2 className="text-2xl font-medium text-text-primary mb-3 tracking-tight">Funcionalidade Exclusiva MAX</h2>
+            <p className="text-text-secondary max-w-lg mb-8 leading-relaxed text-sm">
+              Você tem <b className="text-text-primary">R$ {recoverableAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b> parados em pedidos não pagos. 
+              Assine o plano MAX e libere a ferramenta de recuperação ativa via WhatsApp. <b className="text-text-primary">Recupere 1 pedido e a ferramenta já se paga!</b>
             </p>
-            <Link href="/assinatura" className="btn" style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%)', border: 'none', padding: '12px 24px', fontSize: '1.1rem' }}>
-              Desbloquear Recuperação <ArrowRight size={18} style={{ marginLeft: '8px' }} />
+            <Link href="/assinatura" className="flex items-center gap-2 px-6 py-3 bg-[linear-gradient(135deg,#3b82f6,#8b5cf6)] hover:opacity-90 text-white rounded-md font-medium transition-all active:scale-95 shadow-xl">
+              Desbloquear Recuperação <ArrowRight size={18} />
             </Link>
           </div>
         )}
 
-        <div className="table-container" style={{ flex: 1, overflowY: 'auto', padding: '24px', filter: !isMaxPlan ? 'blur(2px)' : 'none' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div className={`flex-1 overflow-y-auto p-0 ${!isMaxPlan ? 'opacity-30 blur-[2px] pointer-events-none' : ''}`}>
+          <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
-              <tr style={{ borderBottom: '2px solid var(--border)', textAlign: 'left' }}>
-                <th style={{ paddingBottom: '16px' }}>Nº</th>
-                <th style={{ paddingBottom: '16px' }}>Cliente</th>
-                <th style={{ paddingBottom: '16px' }}>Data</th>
-                <th style={{ paddingBottom: '16px' }}>Valor</th>
-                <th style={{ paddingBottom: '16px' }}>Status</th>
-                <th style={{ paddingBottom: '16px' }}>Ação</th>
+              <tr className="border-b border-border text-xs font-medium text-text-secondary uppercase tracking-widest bg-surface/80">
+                <th className="p-4 font-medium pl-6">Nº</th>
+                <th className="p-4 font-medium">Cliente</th>
+                <th className="p-4 font-medium">Data</th>
+                <th className="p-4 font-medium">Valor</th>
+                <th className="p-4 font-medium">Status</th>
+                <th className="p-4 font-medium pr-6">Ação</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="text-sm">
               {safeOrders.length === 0 ? (
                 <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
-                    Nenhum carrinho abandonado no momento.
+                  <td colSpan="6" className="text-center py-16 text-text-secondary">
+                    Nenhum carrinho abandonado ou boleto pendente no momento.
                   </td>
                 </tr>
               ) : (
@@ -136,26 +134,26 @@ export default async function RecuperacaoPage({ searchParams }) {
                     .replace(/\[CodigoRastreio\]/g, order.tracking_code || 'ainda não gerado');
                   
                   return (
-                    <tr key={order.id} style={{ borderBottom: '1px solid var(--border)', transition: 'background-color 0.2s' }}>
-                      <td style={{ padding: '16px 0', fontWeight: 'bold' }}>#{order.order_number}</td>
-                      <td style={{ padding: '16px 0' }}>{order.customer_name}</td>
-                      <td style={{ padding: '16px 0' }}>{purchaseDate.toLocaleDateString('pt-BR')}</td>
-                      <td style={{ padding: '16px 0', fontWeight: '500', color: '#10b981' }}>
+                    <tr key={order.id} className="border-b border-border/50 hover:bg-surface-hover/20 transition-colors group">
+                      <td className="p-4 pl-6 font-medium text-text-secondary group-hover:text-text-primary">#{order.order_number}</td>
+                      <td className="p-4 text-text-secondary">{order.customer_name}</td>
+                      <td className="p-4 text-text-secondary">{purchaseDate.toLocaleDateString('pt-BR')}</td>
+                      <td className="p-4 font-medium text-emerald-400">
                         R$ {Number(order.total_amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
-                      <td style={{ padding: '16px 0' }}>
-                        <span className={`badge ${order.payment_status === 'abandoned' ? 'danger' : 'warning'}`}>
+                      <td className="p-4">
+                        <span className={`px-2.5 py-1 text-[11px] font-medium rounded-sm whitespace-nowrap ${order.payment_status === 'abandoned' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'}`}>
                           {order.payment_status === 'abandoned' ? 'Abandonado' : 'Pendente'}
                         </span>
                       </td>
-                      <td style={{ padding: '16px 0' }}>
+                      <td className="p-4 pr-6">
                         <a 
                           href={isMaxPlan ? `https://wa.me/?text=${encodeURIComponent(rawMsg)}` : '#'}
                           target={isMaxPlan ? "_blank" : "_self"}
                           rel="noreferrer"
-                          style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none', fontWeight: '500', padding: '8px 16px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px', width: 'fit-content' }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 font-medium text-xs rounded-md transition-colors w-fit shadow-sm"
                         >
-                          <MessageCircle size={18} /> Recuperar Venda
+                          <MessageCircle size={16} /> Recuperar Venda
                         </a>
                       </td>
                     </tr>

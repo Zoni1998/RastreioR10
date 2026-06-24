@@ -15,47 +15,53 @@ export default function NavigationSidebar({ storeName, isAdmin, adminEmail }) {
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const isAdminRoute = pathname?.startsWith('/admin');
 
+  // Classes padrão do botão (estilo B2B premium)
+  const baseLinkClass = "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-200 group";
+  const activeLinkClass = "bg-surface-hover/50 text-text-primary shadow-[inset_2px_0_0_0_#fff]";
+  const inactiveLinkClass = "text-text-secondary hover:text-text-primary hover:bg-surface-hover/30";
+
   if (isAdminRoute && isAdmin) {
-    // SIDEBAR DO ADMIN
     return (
-      <aside className="sidebar" style={{ background: 'linear-gradient(180deg, #111827 0%, #1f2937 100%)', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
-        <div className="sidebar-logo">
-          <Shield className="logo-icon" size={28} color="#8b5cf6" />
-          <span style={{ color: '#fff' }}>TrackFlow HQ</span>
+      <aside className="w-full md:w-64 liquid-glass border border-border/40 p-5 flex flex-col gap-4 z-20 m-4 rounded-[2rem] shadow-xl shrink-0 h-[calc(100vh-32px)]">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="bg-indigo-500/10 p-1.5 rounded-sm border border-indigo-500/20">
+            <Shield size={20} className="text-indigo-400" />
+          </div>
+          <span className="font-semibold text-text-primary tracking-tight">AuraTrack HQ</span>
         </div>
 
-        <div style={{ marginBottom: '24px', padding: '0 16px' }}>
-          <p style={{ margin: 0, color: '#9ca3af', fontSize: '0.85rem' }}>Nível de Acesso</p>
-          <p style={{ margin: '4px 0 0 0', fontWeight: 'bold', fontSize: '1.1rem', color: '#8b5cf6' }}>
-            Fundador / CEO
-          </p>
+        <div className="px-1 mb-4">
+          <p className="text-xs font-medium text-text-secondary uppercase tracking-widest mb-1">Acesso</p>
+          <p className="font-medium text-sm text-indigo-400">Fundador / CEO</p>
         </div>
         
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-          <Link href="/admin" className={`nav-link ${pathname === '/admin' ? 'active' : ''}`} style={{ color: '#e5e7eb' }}>
-            <Activity size={20} />
+        <nav className="flex flex-col gap-1 flex-1">
+          <Link href="/admin" className={`${baseLinkClass} ${pathname === '/admin' ? activeLinkClass : inactiveLinkClass}`}>
+            <Activity size={18} className={pathname === '/admin' ? 'text-text-primary' : 'text-text-secondary group-hover:text-text-secondary'} />
             Comando Central
           </Link>
-          <Link href="/admin/clientes" className={`nav-link ${pathname?.startsWith('/admin/clientes') ? 'active' : ''}`} style={{ color: '#e5e7eb' }}>
-            <Users size={20} />
+          <Link href="/admin/clientes" className={`${baseLinkClass} ${pathname?.startsWith('/admin/clientes') ? activeLinkClass : inactiveLinkClass}`}>
+            <Users size={18} className={pathname?.startsWith('/admin/clientes') ? 'text-text-primary' : 'text-text-secondary group-hover:text-text-secondary'} />
             Lojas & Clientes
           </Link>
-          <Link href="/admin/config" className={`nav-link ${pathname?.startsWith('/admin/config') ? 'active' : ''}`} style={{ color: '#e5e7eb' }}>
-            <Settings size={20} />
+          <Link href="/admin/config" className={`${baseLinkClass} ${pathname?.startsWith('/admin/config') ? activeLinkClass : inactiveLinkClass}`}>
+            <Settings size={18} className={pathname?.startsWith('/admin/config') ? 'text-text-primary' : 'text-text-secondary group-hover:text-text-secondary'} />
             Configurações SaaS
           </Link>
 
-          <Link href="/" className="nav-link" style={{ marginTop: 'auto', backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
-            <LayoutDashboard size={20} />
-            Sair do Modo HQ
-          </Link>
-          
-          <form action={logout}>
-            <button type="submit" className="nav-link" style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', color: '#ef4444', marginTop: '8px' }}>
-              <LogOut size={20} />
-              Fazer Logout
-            </button>
-          </form>
+          <div className="mt-auto flex flex-col gap-1 pt-6 border-t border-border">
+            <Link href="/" className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-all">
+              <LayoutDashboard size={18} />
+              Sair do Modo HQ
+            </Link>
+            
+            <form action={logout}>
+              <button type="submit" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all text-left">
+                <LogOut size={18} />
+                Fazer Logout
+              </button>
+            </form>
+          </div>
         </nav>
       </aside>
     );
@@ -63,72 +69,74 @@ export default function NavigationSidebar({ storeName, isAdmin, adminEmail }) {
 
   // SIDEBAR DO LOJISTA
   return (
-    <aside className="sidebar">
-      <div className="sidebar-logo">
-        <Package className="logo-icon" size={28} color="var(--primary)" />
-        <span>TrackFlow</span>
-      </div>
-
-      <div style={{ marginBottom: '24px', padding: '0 16px' }}>
-        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Olá,</p>
-        <p style={{ margin: '4px 0 0 0', fontWeight: 'bold', fontSize: '1.1rem', color: 'var(--primary)', textTransform: 'capitalize', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {storeName}!
-        </p>
-      </div>
-      
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-        <Link href="/" className={`nav-link ${pathname === '/' ? 'active' : ''}`}>
-          <LayoutDashboard size={20} />
-          Dashboard
-        </Link>
-        <Link href="/pedidos" className={`nav-link ${pathname?.startsWith('/pedidos') ? 'active' : ''}`}>
-          <Package size={20} />
-          Pedidos
-        </Link>
-        <Link href="/alertas" className={`nav-link ${pathname?.startsWith('/alertas') ? 'active' : ''}`}>
-          <Bell size={20} />
-          Alertas
-        </Link>
-        <Link href="/recuperacao" className={`nav-link ${pathname?.startsWith('/recuperacao') ? 'active' : ''}`} style={{ color: '#10b981' }}>
-          <ShoppingCart size={20} />
-          Recuperação
-        </Link>
-        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <Link href="/configuracoes" className={`nav-link ${pathname?.startsWith('/configuracoes') ? 'active' : ''}`}>
-            <Settings size={20} />
-            Configurações
-          </Link>
-          
-          {isAdmin && (
-            <Link href="/admin" className="nav-link" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', fontWeight: 'bold' }}>
-              <Target size={20} />
-              Modo Fundador (HQ)
-            </Link>
-          )}
-          
-          <button 
-            onClick={() => setIsSupportModalOpen(true)} 
-            className="nav-link" 
-            style={{ color: 'var(--text-secondary)', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%', fontSize: '1rem' }}
-          >
-            <Shield size={20} />
-            Falar com Suporte
-          </button>
-
-          <form action={logout}>
-            <button type="submit" className="nav-link" style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', color: 'var(--danger)' }}>
-              <LogOut size={20} />
-              Sair
-            </button>
-          </form>
+    <>
+      <aside className="w-full md:w-64 liquid-glass border border-border/40 p-5 flex flex-col gap-4 z-20 m-4 rounded-[2rem] shadow-xl shrink-0 h-[calc(100vh-32px)]">
+        <div className="flex items-center gap-2 mb-6">
+          <img src="/logo.png" alt="AuraTrack" className="w-8 h-8 rounded-sm object-contain" />
+          <span className="font-semibold text-text-primary tracking-tight">AuraTrack</span>
         </div>
-      </nav>
+
+        <div className="px-1 mb-4">
+          <p className="text-xs font-medium text-text-secondary uppercase tracking-widest mb-1">Operação</p>
+          <p className="font-medium text-sm text-text-primary capitalize truncate" title={storeName}>
+            {storeName || 'Sua Loja'}
+          </p>
+        </div>
+        
+        <nav className="flex flex-col gap-1 flex-1">
+          <Link href="/" className={`${baseLinkClass} ${pathname === '/' ? activeLinkClass : inactiveLinkClass}`}>
+            <LayoutDashboard size={18} className={pathname === '/' ? 'text-text-primary' : 'text-text-secondary group-hover:text-text-secondary'} />
+            Dashboard
+          </Link>
+          <Link href="/pedidos" className={`${baseLinkClass} ${pathname?.startsWith('/pedidos') ? activeLinkClass : inactiveLinkClass}`}>
+            <Package size={18} className={pathname?.startsWith('/pedidos') ? 'text-text-primary' : 'text-text-secondary group-hover:text-text-secondary'} />
+            Pedidos
+          </Link>
+          <Link href="/alertas" className={`${baseLinkClass} ${pathname?.startsWith('/alertas') ? activeLinkClass : inactiveLinkClass}`}>
+            <Bell size={18} className={pathname?.startsWith('/alertas') ? 'text-text-primary' : 'text-text-secondary group-hover:text-text-secondary'} />
+            Alertas
+          </Link>
+          <Link href="/recuperacao" className={`${baseLinkClass} ${pathname?.startsWith('/recuperacao') ? 'bg-emerald-500/10 text-emerald-400 shadow-[inset_2px_0_0_0_#34d399]' : 'text-emerald-500/70 hover:text-emerald-400 hover:bg-emerald-500/5'}`}>
+            <ShoppingCart size={18} />
+            Recuperação
+          </Link>
+
+          <div className="mt-auto flex flex-col gap-1 pt-6 border-t border-border">
+            <Link href="/configuracoes" className={`${baseLinkClass} ${pathname?.startsWith('/configuracoes') ? activeLinkClass : inactiveLinkClass}`}>
+              <Settings size={18} className={pathname?.startsWith('/configuracoes') ? 'text-text-primary' : 'text-text-secondary group-hover:text-text-secondary'} />
+              Configurações
+            </Link>
+            
+            {isAdmin && (
+              <Link href="/admin" className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-all mt-2">
+                <Target size={18} />
+                Modo Fundador (HQ)
+              </Link>
+            )}
+            
+            <button 
+              onClick={() => setIsSupportModalOpen(true)} 
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-surface-hover/30 transition-all text-left"
+            >
+              <Shield size={18} className="text-text-secondary" />
+              Falar com Suporte
+            </button>
+
+            <form action={logout}>
+              <button type="submit" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-text-secondary hover:bg-red-500/10 hover:text-red-400 transition-all text-left mt-2">
+                <LogOut size={18} className="text-text-secondary group-hover:text-red-400" />
+                Sair da conta
+              </button>
+            </form>
+          </div>
+        </nav>
+      </aside>
 
       <SupportModal 
         adminEmail={adminEmail} 
         isOpen={isSupportModalOpen} 
         onClose={() => setIsSupportModalOpen(false)} 
       />
-    </aside>
+    </>
   );
 }

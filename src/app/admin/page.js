@@ -102,7 +102,7 @@ export default async function AdminPage() {
 
       {/* Cards de Métricas */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '24px', marginBottom: '48px' }}>
-        <div className="card" style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, var(--surface) 100%)', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+        <div className="p-6 rounded-[2rem] liquid-glass shadow-lg border border-border/40" style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, var(--surface) 100%)', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{ padding: '16px', backgroundColor: 'rgba(99, 102, 241, 0.2)', borderRadius: '12px' }}>
               <DollarSign size={24} color="var(--primary)" />
@@ -116,7 +116,7 @@ export default async function AdminPage() {
           </div>
         </div>
 
-        <div className="card">
+        <div className="p-6 rounded-[2rem] liquid-glass shadow-lg border border-border/40">
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{ padding: '16px', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px' }}>
               <Store size={24} color="#10b981" />
@@ -128,7 +128,7 @@ export default async function AdminPage() {
           </div>
         </div>
 
-        <div className="card">
+        <div className="p-6 rounded-[2rem] liquid-glass shadow-lg border border-border/40">
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{ padding: '16px', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px' }}>
               <Package size={24} color="var(--info)" />
@@ -140,7 +140,7 @@ export default async function AdminPage() {
           </div>
         </div>
 
-        <div className="card">
+        <div className="p-6 rounded-[2rem] liquid-glass shadow-lg border border-border/40">
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{ padding: '16px', backgroundColor: 'rgba(245, 158, 11, 0.1)', borderRadius: '12px' }}>
               <DollarSign size={24} color="var(--warning)" />
@@ -156,7 +156,7 @@ export default async function AdminPage() {
       </div>
 
       {/* Churn Prevention Board */}
-      <div className="card" style={{ padding: '24px', border: '1px solid rgba(239, 68, 68, 0.2)', background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, var(--surface) 100%)' }}>
+      <div className="p-8 rounded-[2rem] liquid-glass shadow-2xl border border-red-500/30" style={{ background: 'color-mix(in srgb, var(--surface) 40%, rgba(239, 68, 68, 0.1))' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <h2 style={{ margin: 0, fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444' }}>
             <AlertTriangle size={20} /> Prevenção de Churn (Risco de Cancelamento)

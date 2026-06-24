@@ -82,103 +82,72 @@ export default async function AssinaturaPage() {
   ];
 
   return (
-    <div style={{ paddingBottom: '64px' }}>
-      <div className="page-header" style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto', paddingBottom: '32px' }}>
-        <h1 className="page-title" style={{ justifyContent: 'center', fontSize: '2.5rem', marginBottom: '16px' }}>Faça o Upgrade da sua Operação</h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: '1.6' }}>
+    <div className="pb-16 px-4">
+      <div className="text-center max-w-3xl mx-auto pb-12">
+        <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-4 text-text-primary">Faça o Upgrade da sua Operação</h1>
+        <p className="text-text-secondary text-lg leading-relaxed">
           Escolha o plano ideal para blindar sua logística, reter mais clientes e profissionalizar sua marca. Comece pequeno, escale rápido.
         </p>
       </div>
 
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-        gap: '24px',
-        maxWidth: '1200px',
-        margin: '0 auto',
-        alignItems: 'start'
-      }}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto items-start pt-10">
         {plans.map((plan) => {
           const isCurrent = currentPlan === plan.id;
           
           return (
             <div 
-              key={plan.id} 
-              className="card" 
-              style={{ 
-                position: 'relative',
-                display: 'flex', 
-                flexDirection: 'column',
-                height: '100%',
-                border: plan.highlight ? `2px solid ${plan.color}` : '1px solid var(--border)',
-                transform: plan.highlight ? 'scale(1.02)' : 'none',
-                boxShadow: plan.highlight ? `0 20px 40px -10px rgba(139, 92, 246, 0.15)` : 'var(--shadow-sm)'
-              }}
+              key={plan.id}
+              className={`relative flex flex-col h-full transition-all duration-300 ${plan.highlight ? 'lg:scale-105 z-10' : 'hover:-translate-y-1'}`}
+              style={{ '--color': plan.color }}
             >
               {plan.highlight && (
-                <div style={{ 
-                  position: 'absolute', 
-                  top: '-14px', 
-                  left: '50%', 
-                  transform: 'translateX(-50%)',
-                  backgroundColor: plan.color,
-                  color: 'white',
-                  padding: '4px 16px',
-                  borderRadius: '16px',
-                  fontSize: '0.85rem',
-                  fontWeight: 'bold',
-                  letterSpacing: '0.5px',
-                  textTransform: 'uppercase'
-                }}>
+                <div 
+                  className="absolute -top-4 left-1/2 -translate-x-1/2 text-white px-5 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase shadow-lg z-20"
+                  style={{ backgroundColor: plan.color }}
+                >
                   Mais Popular
                 </div>
               )}
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: `${plan.color}15` }}>
+              <div 
+                className={`flex flex-col h-full rounded-[2rem] p-8 ${plan.highlight ? 'bg-surface/80 liquid-glass border-2 border-[var(--color)] shadow-2xl' : 'liquid-glass border border-border/40 shadow-xl'}`}
+              >
+
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-3 rounded-2xl" style={{ backgroundColor: `${plan.color}15` }}>
                   {plan.icon}
                 </div>
-                <h2 style={{ fontSize: '1.5rem', margin: 0 }}>{plan.name}</h2>
+                <h2 className="text-2xl font-medium text-text-primary m-0">{plan.name}</h2>
               </div>
               
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: '24px', minHeight: '44px' }}>
+              <p className="text-text-secondary text-sm mb-8 min-h-[48px] leading-relaxed">
                 {plan.description}
               </p>
 
-              <div style={{ marginBottom: '32px' }}>
-                <span style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+              <div className="mb-10">
+                <span className="text-4xl font-semibold text-text-primary tracking-tight">
                   R$ {plan.price}
                 </span>
-                <span style={{ color: 'var(--text-secondary)' }}>/mês</span>
+                <span className="text-text-secondary ml-1">/mês</span>
               </div>
 
               {isCurrent ? (
                 <button 
-                  className="btn" 
                   disabled
-                  style={{ 
-                    width: '100%', 
-                    marginBottom: '32px', 
-                    backgroundColor: 'transparent',
-                    border: '1px solid var(--border)',
-                    color: 'var(--text-secondary)'
-                  }}
+                  className="w-full mb-10 bg-transparent border border-border/60 text-text-secondary py-3.5 rounded-xl font-medium cursor-not-allowed"
                 >
                   Seu Plano Atual
                 </button>
               ) : (
-                <form action="/api/stripe/checkout" method="POST" style={{ marginBottom: '32px' }}>
+                <form action="/api/stripe/checkout" method="POST" className="mb-10">
                   <input type="hidden" name="planId" value={plan.id} />
                   <button 
                     type="submit"
-                    className="btn" 
+                    className="w-full py-3.5 rounded-xl font-medium transition-all active:scale-95 shadow-md hover:shadow-lg"
                     style={{ 
-                      width: '100%', 
-                      backgroundColor: plan.highlight ? plan.color : 'var(--surface)',
+                      backgroundColor: plan.highlight ? plan.color : 'var(--surface-hover)',
                       color: plan.highlight ? 'white' : 'var(--text-primary)',
-                      border: plan.highlight ? 'none' : '1px solid var(--border)',
-                      padding: '12px',
-                      fontWeight: 'bold'
+                      border: plan.highlight ? 'none' : '1px solid var(--border)'
                     }}
                   >
                     Assinar {plan.name}
@@ -186,23 +155,24 @@ export default async function AssinaturaPage() {
                 </form>
               )}
 
-              <div style={{ flexGrow: 1 }}>
-                <p style={{ fontWeight: '600', marginBottom: '16px', fontSize: '0.95rem' }}>O que está incluído:</p>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className="flex-grow">
+                <p className="font-semibold text-sm mb-5 text-text-primary">O que está incluído:</p>
+                <ul className="flex flex-col gap-4 m-0 p-0 list-none">
                   {plan.features.map((feature, i) => (
-                    <li key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-                      <Check size={18} color={plan.color} style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <li key={i} className="flex gap-3 items-start text-sm text-text-primary">
+                      <Check size={18} color={plan.color} className="shrink-0 mt-0.5" />
                       <span>{feature}</span>
                     </li>
                   ))}
                   
                   {plan.notIncluded.map((feature, i) => (
-                    <li key={`not-${i}`} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', fontSize: '0.9rem', color: 'var(--text-secondary)', opacity: 0.6 }}>
-                      <div style={{ width: '18px', height: '1px', backgroundColor: 'var(--text-secondary)', marginTop: '10px', flexShrink: 0 }} />
+                    <li key={`not-${i}`} className="flex gap-3 items-start text-sm text-text-secondary/50">
+                      <div className="w-[18px] h-[1px] bg-text-secondary/40 mt-2.5 shrink-0" />
                       <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
+              </div>
               </div>
             </div>
           );

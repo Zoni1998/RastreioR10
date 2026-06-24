@@ -55,7 +55,7 @@ export async function syncOrdersAction() {
       const response = await fetch(`https://api.tiendanube.com/v1/${store.nuvemshop_store_id}/orders?per_page=200&page=${page}`, {
         headers: {
           'Authorization': `Bearer ${store.access_token}`,
-          'User-Agent': 'TrackFlow App (admin@trackflow.com)'
+          'User-Agent': 'AuraTrack App (admin@trackflow.com)'
         }
       });
 

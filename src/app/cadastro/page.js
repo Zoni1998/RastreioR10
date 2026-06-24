@@ -1,209 +1,124 @@
-'use client'
+'use client';
 
-import { useActionState } from 'react'
-import { signup } from '../auth/actions'
-import Link from 'next/link'
-import { Package, ArrowRight, TrendingUp, BarChart3 } from 'lucide-react'
+import { useActionState } from 'react';
+import { signup } from '../auth/actions';
+import Link from 'next/link';
+import { Package, ArrowRight } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
 
-export default function RegisterPage() {
-  const [state, formAction, isPending] = useActionState(signup, null)
+export default function CadastroPage() {
+  const [state, formAction, isPending] = useActionState(signup, null);
+  const reduce = useReducedMotion();
 
   return (
-    <div style={{ display: 'flex', width: '100%', minHeight: '100vh', backgroundColor: 'var(--background)' }}>
-      
-      {/* Lado Esquerdo - Formulário */}
-      <div style={{ 
-        flex: '1', 
-        display: 'flex', 
-        flexDirection: 'column', 
-        justifyContent: 'center', 
-        alignItems: 'center',
-        padding: '40px 24px',
-        position: 'relative'
-      }}>
-        <div style={{ width: '100%', maxWidth: '400px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
-            <div style={{ padding: '10px', background: 'var(--primary)', borderRadius: '12px', boxShadow: 'var(--shadow-primary)' }}>
-              <Package size={28} color="#fff" />
-            </div>
-            <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>TrackFlow</span>
-          </div>
+    <div className="flex min-h-[100dvh] w-full bg-background text-text-primary font-sans selection:bg-surface-hover selection:text-white">
+      <div className="flex-1 flex flex-col items-center justify-center p-8 relative z-10">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
+        <div className="w-full max-w-md mx-auto p-10 rounded-[2rem] liquid-glass border border-border/40 shadow-2xl z-10">
+          <motion.div 
+            initial={reduce ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="flex items-center gap-3 mb-16"
+          >
+            <img src="/logo.png" alt="AuraTrack" className="w-8 h-8 rounded-sm object-contain" />
+            <span className="font-semibold tracking-tight text-lg">AuraTrack</span>
+          </motion.div>
 
-          <h1 style={{ fontSize: '2rem', marginBottom: '8px', color: 'var(--text-primary)', fontWeight: '700' }}>Crie sua conta</h1>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '32px', fontSize: '1rem' }}>
-            Comece a monitorar a saúde logística do seu e-commerce gratuitamente.
-          </p>
+          <motion.div 
+            initial={reduce ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+            className="mb-10"
+          >
+            <h1 className="text-3xl md:text-4xl font-medium tracking-tight mb-3">
+              Nova operação
+            </h1>
+            <p className="text-text-secondary text-sm leading-relaxed max-w-[40ch]">
+              Comece a proteger sua receita em menos de 2 minutos. Insira seus dados abaixo.
+            </p>
+          </motion.div>
 
-          <form action={formAction} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            
+          <motion.form 
+            action={formAction} 
+            className="flex flex-col gap-5"
+            initial={reduce ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
+          >
             {state?.error && (
-              <div style={{ 
-                padding: '16px', 
-                backgroundColor: 'rgba(239, 68, 68, 0.1)', 
-                border: '1px solid rgba(239, 68, 68, 0.2)', 
-                borderRadius: '8px', 
-                color: 'var(--danger)',
-                fontSize: '0.9rem',
-                fontWeight: '500'
-              }}>
+              <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-md text-sm font-medium">
                 {state.error}
               </div>
             )}
 
-            {state?.requireEmailVerification ? (
-              <div style={{
-                padding: '32px',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                border: '1px solid rgba(16, 185, 129, 0.2)',
-                borderRadius: '16px',
-                textAlign: 'center',
-                animation: 'fadeIn 0.5s ease-out'
-              }}>
-                <div style={{
-                  width: '64px', height: '64px', borderRadius: '50%',
-                  backgroundColor: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  margin: '0 auto 16px auto', boxShadow: '0 8px 16px rgba(16, 185, 129, 0.2)'
-                }}>
-                  <Package size={32} color="#fff" />
-                </div>
-                <h3 style={{ margin: '0 0 12px 0', fontSize: '1.25rem', color: '#10b981' }}>Quase lá!</h3>
-                <p style={{ margin: '0 0 24px 0', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                  {state.message} Confira também a sua pasta de Spam.
-                </p>
-                <Link href="/login" className="btn" style={{ textDecoration: 'none', width: '100%', display: 'inline-block' }}>
-                  Ir para o Login
-                </Link>
-              </div>
-            ) : (
-              <>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label htmlFor="email" style={{ fontSize: '0.9rem', fontWeight: '500', color: 'var(--text-primary)' }}>E-mail profissional</label>
-                  <input 
-                    id="email" 
-                    name="email" 
-                    type="email" 
-                    required 
-                    placeholder="voce@sualoja.com.br"
-                    style={{ 
-                      padding: '14px 16px', 
-                      borderRadius: '12px', 
-                      border: '1px solid var(--border)', 
-                      backgroundColor: 'var(--surface)', 
-                      color: 'var(--text-primary)',
-                      outline: 'none',
-                      fontSize: '1rem',
-                      transition: 'border-color 0.2s'
-                    }}
-                  />
-                </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="email" className="text-xs font-medium text-text-secondary uppercase tracking-widest">
+                E-mail profissional
+              </label>
+              <input 
+                id="email" 
+                name="email" 
+                type="email" 
+                required 
+                placeholder="nome@empresa.com.br"
+                className="w-full bg-surface border border-border rounded-md px-4 py-3 text-sm text-text-primary placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500 transition-all"
+              />
+            </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label htmlFor="password" style={{ fontSize: '0.9rem', fontWeight: '500', color: 'var(--text-primary)' }}>Crie uma senha forte</label>
-                  <input 
-                    id="password" 
-                    name="password" 
-                    type="password" 
-                    required 
-                    placeholder="••••••••"
-                    style={{ 
-                      padding: '14px 16px', 
-                      borderRadius: '12px', 
-                      border: '1px solid var(--border)', 
-                      backgroundColor: 'var(--surface)', 
-                      color: 'var(--text-primary)',
-                      outline: 'none',
-                      fontSize: '1rem',
-                      transition: 'border-color 0.2s'
-                    }}
-                  />
-                </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="password" className="text-xs font-medium text-text-secondary uppercase tracking-widest">
+                Senha
+              </label>
+              <input 
+                id="password" 
+                name="password" 
+                type="password" 
+                required 
+                placeholder="Mínimo de 6 caracteres"
+                className="w-full bg-surface border border-border rounded-md px-4 py-3 text-sm text-text-primary placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500 transition-all"
+              />
+            </div>
 
-                <button 
-                  type="submit" 
-                  disabled={isPending}
-                  style={{
-                    marginTop: '8px',
-                    padding: '14px',
-                    backgroundColor: 'var(--primary)',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '12px',
-                    fontSize: '1rem',
-                    fontWeight: '600',
-                    cursor: isPending ? 'not-allowed' : 'pointer',
-                    opacity: isPending ? 0.7 : 1,
-                    boxShadow: 'var(--shadow-primary)',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    gap: '8px',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  {isPending ? 'Criando conta...' : (
-                    <>Criar Conta Grátis <ArrowRight size={18} /></>
-                  )}
-                </button>
-              </>
-            )}
-          </form>
+            <button 
+              type="submit" 
+              disabled={isPending}
+              className="mt-4 w-full bg-text-primary hover:bg-text-primary/90 text-background font-medium py-3 px-4 rounded-md text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+            >
+              {isPending ? (
+                <span className="animate-pulse">Criando conta...</span>
+              ) : (
+                <span className="flex items-center justify-center gap-2">Continuar <ArrowRight size={16} strokeWidth={2} /></span>
+              )}
+            </button>
+          </motion.form>
 
-          <p style={{ marginTop: '32px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-            Já tem uma conta? <Link href="/login" style={{ color: 'var(--primary)', fontWeight: '600', textDecoration: 'none' }}>Fazer login</Link>
+        </div>
+
+        <motion.div 
+          initial={reduce ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+          className="mt-8 z-10 text-center"
+        >
+          <p className="text-sm text-text-secondary">
+            Já possui uma conta?{' '}
+            <Link href="/login" className="text-primary hover:brightness-125 transition-colors font-medium">
+              Faça login
+            </Link>
           </p>
-        </div>
+        </motion.div>
       </div>
 
-      {/* Lado Direito - Hero visual */}
-      <div style={{ 
-        flex: '1.2', 
-        display: 'none', 
-        flexDirection: 'column',
-        justifyContent: 'center',
-        padding: '60px',
-        '@media (min-width: 900px)': { display: 'flex' },
-        background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-        borderLeft: '1px solid rgba(255,255,255,0.05)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{ position: 'absolute', top: '20%', right: '10%', width: '300px', height: '300px', background: 'var(--info)', borderRadius: '50%', filter: 'blur(150px)', opacity: '0.1' }}></div>
-        <div style={{ position: 'absolute', bottom: '10%', left: '-10%', width: '400px', height: '400px', background: 'var(--primary)', borderRadius: '50%', filter: 'blur(150px)', opacity: '0.15' }}></div>
-        
-        <div style={{ zIndex: 1, maxWidth: '500px', margin: '0 auto' }}>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: '700', color: '#fff', marginBottom: '24px', lineHeight: '1.2' }}>
-            Retenha lucro que você nem sabia que estava perdendo.
-          </h2>
-          
-          <div className="glass-panel" style={{ padding: '32px', borderRadius: '24px', boxShadow: 'var(--shadow-lg)' }}>
-            <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <TrendingUp size={24} color="var(--info)" />
-              </div>
-              <div>
-                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', color: '#fff' }}>Escala Sustentável</h3>
-                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.5' }}>Conforme você escala, os erros logísticos não escalam junto.</p>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '16px' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <BarChart3 size={24} color="var(--warning)" />
-              </div>
-              <div>
-                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', color: '#fff' }}>Dashboard Executivo</h3>
-                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.5' }}>Veja a saúde da sua operação em uma única tela orientada a dados reais.</p>
-              </div>
-            </div>
-          </div>
+      <div className="hidden lg:flex flex-1 bg-surface relative border-l border-border items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        <div className="relative z-10 w-full max-w-lg p-12 text-center">
+            <h2 className="text-2xl font-medium text-text-primary mb-4">Arquitetura de retenção.</h2>
+            <p className="text-text-secondary text-sm leading-relaxed">
+              Dezenas de lojistas confiam no AuraTrack como a última linha de defesa antes de um chargeback irreversível.
+            </p>
         </div>
       </div>
-
-      <style dangerouslySetInnerHTML={{__html: `
-        @media (max-width: 900px) {
-          div[style*="flex: 1.2"] { display: none !important; }
-        }
-      `}} />
     </div>
-  )
+  );
 }

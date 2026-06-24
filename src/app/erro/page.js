@@ -10,13 +10,13 @@ export default async function ErrorPage({ searchParams }) {
   
   if (type === 'loja_ja_vinculada') {
     title = 'Loja Já Vinculada';
-    message = 'Essa loja da Nuvemshop já está vinculada a outra conta aqui no TrackFlow. Se você está tentando testar com uma conta nova, por favor, certifique-se de sair da sua conta na Nuvemshop primeiro ou use uma Guia Anônima para vincular uma loja diferente!';
+    message = 'Essa loja da Nuvemshop já está vinculada a outra conta aqui no AuraTrack. Se você está tentando testar com uma conta nova, por favor, certifique-se de sair da sua conta na Nuvemshop primeiro ou use uma Guia Anônima para vincular uma loja diferente!';
   } else if (type === 'auth_falhou') {
     title = 'Falha na Autorização';
     message = 'Não foi possível autorizar o aplicativo. Verifique se você aceitou todas as permissões necessárias.';
   } else if (type === 'nao_logado') {
     title = 'Sessão Expirada';
-    message = 'Você precisa estar logado no TrackFlow para conectar uma loja. Faça login e tente novamente.';
+    message = 'Você precisa estar logado no AuraTrack para conectar uma loja. Faça login e tente novamente.';
   }
 
   return (
